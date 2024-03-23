@@ -47,15 +47,14 @@ const VendorModal = ({ modalVisible, handleCancel, selectedKey, updatedValues, l
                             label="Phone Number"
                             name="phone_number"
                             rules={[
-                                { required: true, message: 'Please input the phone number!' },
+                                { required: true, message: 'Please input the phone number with country code' },
                                 {
-                                    pattern: /^\d{10}$/,
-                                    message: 'Please enter a valid 10-digit phone number!',
+                                    pattern: /^\d{12}$/,
+                                    message: 'Please enter a valid 10-digit phone number with country code',
                                 },
                             ]}
                         >
                             <Input
-                                addonBefore="+91" // Change the country code as per your requirement
                                 placeholder="e.g., 1234567890"
                                 style={{ height: '40px' }}
                             />

@@ -4,6 +4,8 @@ import '../styles/tailwind.css';
 import { Metadata } from 'next';
 import { Nunito } from 'next/font/google';
 
+export const Adminurl = process.env.ADMINURL
+
 export const metadata: Metadata = {
     title: {
         template: '%s | ECOMSYS - Your Go-To CMS for E-commerce',
@@ -19,7 +21,6 @@ const nunito = Nunito({
     variable: '--font-nunito',
 });
 
-export const Adminurl = process.env.ADMINURL
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (

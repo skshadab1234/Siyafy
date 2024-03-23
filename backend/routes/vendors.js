@@ -233,4 +233,141 @@ app.post(
   }
 );
 
+app.get("/vendors/:id", authenticate, async (req, res) => {
+  try {
+    const vendorId = req.params.id;
+
+    // Retrieve vendor details
+    const vendorQuery = await pool.query(
+      "SELECT * FROM vendors_registration WHERE id = $1",
+      [vendorId]
+    );
+
+    // Check if vendor exists
+    if (vendorQuery.rows.length === 0) {
+      return res.status(404).json({ error: "Vendor not found" });
+    }
+
+    // Remove password from vendor details
+    delete vendorQuery.rows[0]?.password;
+
+    // Retrieve stores associated with the vendor
+    const storesQuery = await pool.query(
+      "SELECT * FROM stores WHERE vendor_id = $1",
+      [vendorId]
+    );
+
+    // Append stores to vendor details
+    const vendorWithStores = {
+      ...vendorQuery.rows[0],
+      stores: storesQuery.rows,
+    };
+
+    // Send response with vendor details and associated stores
+    res.json(vendorWithStores);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+const imgConfigStore = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, "./upload/storeMedia");
+  },
+  filename: (req, file, callback) => {
+    callback(null, `Store-${Date.now()}-${file.originalname}`);
+  },
+});
+
+// img filter
+const isVEndorStore = (req, file, callback) => {
+  if (file.mimetype.startsWith("image")) {
+    callback(null, true);
+  } else {
+    callback(new Error("Only images are allowed"));
+  }
+};
+
+const uploadStore = multer({
+  storage: imgConfigStore,
+  fileFilter: isVEndorStore,
+});
+
+app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
+  try {
+    let store_media_filename, banner_media_filename;
+
+    console.log(req.body.selectedRow);
+    return
+    // Check if files are uploaded
+    store_media_filename = req.files?.[0]?.filename || null;
+    banner_media_filename = req.files?.[1]?.filename || null;
+
+    const vendor_id = req.body.vendor_id;
+    const {
+      store_name,
+      address,
+      city,
+      state,
+      country,
+      description,
+      phone,
+      email,
+      website,
+      status,
+    } = JSON.parse(req.body?.data);
+
+    const query = `
+      INSERT INTO stores (store_name, address, city, state, country, description, phone, email, website, logo_url, banner_url, vendor_id, status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    `;
+
+    // Execute the query
+    await pool.query(query, [
+      store_name,
+      address,
+      city,
+      state,
+      country,
+      description,
+      phone,
+      email,
+      website,
+      store_media_filename,
+      banner_media_filename,
+      vendor_id,
+      status,
+    ]);
+
+    // Check the number of stores associated with the vendor
+    const countQuery = await pool.query(
+      "SELECT COUNT(*) AS store_count FROM stores WHERE vendor_id = $1",
+      [vendor_id]
+    );
+    const storeCount = parseInt(countQuery.rows[0].store_count);
+
+    // Update the is_multiple_store flag in vendors_registration table
+    if (storeCount > 1) {
+      await pool.query(
+        "UPDATE vendors_registration SET is_multiple_shop = true WHERE id = $1",
+        [vendor_id]
+      );
+    }
+
+    res.status(200).json({ message: "Store added successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.put("/vendors/store/edit", uploadStore.array("file"), async (req, res) => {
+  try {
+    console.log(req.body);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 module.exports = app;
