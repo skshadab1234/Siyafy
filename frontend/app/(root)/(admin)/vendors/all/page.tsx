@@ -88,6 +88,7 @@ const AllVendors = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            width: 300,
             render: (_, record) => {
                 return (
                     <div className="flex items-center">
@@ -97,6 +98,7 @@ const AllVendors = () => {
                             alt="vendor_image"
                             width={50}
                             height={50}
+                            
                         />
 
                         <div
@@ -108,7 +110,11 @@ const AllVendors = () => {
                         >
                             <IconEdit className="cursor-pointer text-gray-500" />
                         </div>
-                        <h2 className="ml-2 font-semibold text-gray-800 hover:dark:text-black ">{record.name}</h2>
+                        <div className='ml-2'>
+                            <h2 className="font-semibold text-gray-800 hover:dark:text-black ">{record.name}</h2>
+
+                            <p>Stores : {record.store_count}</p>
+                        </div>
                     </div>
                 );
             },
@@ -117,17 +123,23 @@ const AllVendors = () => {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            width: 200,
+
             render: (email) => <a href={`mailto:${email}`}>{email}</a>,
         },
         {
             title: 'Phone Number',
             dataIndex: 'phone_number',
             key: 'phone_number',
+            width: 200,
+
             render: (phoneNumber) => <a href={`tel:${phoneNumber}`}>{phoneNumber}</a>,
         },
         {
             title: 'Address',
             key: 'address',
+            width: 400,
+
             render: (record) => (
                 <div>
                     <div>{record.head_office_address_line1}</div>
@@ -142,6 +154,8 @@ const AllVendors = () => {
             title: 'Vendor Status',
             dataIndex: 'vendor_status',
             key: 'vendor_status',
+            width: 200,
+
             render: (status: number) => {
                 let statusText = '';
                 let statusColor = '';
@@ -184,6 +198,8 @@ const AllVendors = () => {
         {
             title: 'Action',
             key: 'action',
+            width: 200,
+
             render: (record: any) => (
                 <div className="flex gap-3">
                     <div className="flex cursor-pointer items-center  gap-2 " onClick={() => editVendor(record)}>
@@ -210,9 +226,9 @@ const AllVendors = () => {
         form.setFieldsValue(vendor);
     };
 
-    const deleteVendor = () => {
-        if (selectedRowKeys?.length <= 0) return;
-
+    const deleteVendor = (id = null) => {
+        if (selectedRowKeys?.length <= 0 && !id) return;
+        selectedRowKeys?.push(id);
         Modal.confirm({
             title: 'Confirm Deletion',
             content: `Are you sure you want to delete the vendor?`,
@@ -225,7 +241,7 @@ const AllVendors = () => {
                             'Content-Type': 'application/json',
                             Authorization: `Bearer ${token}`,
                         },
-                        body: JSON.stringify({ ids: selectedRowKeys }), // Send the selectedRowKeys as the ID to delete
+                        body: JSON.stringify({ ids: selectedRowKeys || id }), // Send the selectedRowKeys as the ID to delete
                     });
 
                     if (res.status === 401) {
@@ -287,36 +303,47 @@ const AllVendors = () => {
     };
 
     const onFinish = async (values: any) => {
+        // Assuming setLoader is a state setter function to control loading indicator
         setLoader(true);
 
+        const requestUrl = selectedKey ? '/api/Admin/Vendors/edit' : '/api/Admin/Vendors/add';
+        const methodType = selectedKey ? 'POST' : 'POST'; // Adjust based on your API requirements
+        const requestBody = selectedKey ? JSON.stringify({ vendorId: selectedKey?.id, values }) : JSON.stringify(values);
+
         try {
-            const res = await fetch('/api/Admin/Vendors/add', {
-                method: 'POST',
+            const res = await fetch(requestUrl, {
+                method: methodType,
                 headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`, // Ensure your token is correctly set
                 },
-                body: JSON.stringify(values), // Send the form values to the backend
+                body: requestBody,
             });
 
             if (!res.ok) {
-                throw new Error('Failed to add vendor');
+                throw new Error(`Failed to ${selectedKey ? 'update' : 'add'} vendor`);
             }
 
             const data = await res.json();
             console.log('Success:', data);
 
-            // Append the new vendor object to the vendors array
-            setVendors([...vendors, data.data]);
+            if (selectedKey) {
+                // Update the vendor in the local state to reflect the changes
+                setVendors(vendors.map((vendor) => (vendor.id === selectedKey.id ? { ...vendor, ...values } : vendor)));
+                showMessage('Vendor has been updated successfully.');
+            } else {
+                // Append the new vendor object to the vendors array
+                setVendors([...vendors, data.data]);
+                showMessage('Vendor has been added successfully.');
+            }
 
-            showMessage('Vendor has been added successfully.');
-            form.resetFields();
-            handleCancel(); // Close the modal after successful addition
+            form.resetFields(); // Reset form fields
+            handleCancel(); // Close the modal
         } catch (error) {
             console.error('Error:', error);
-            // Handle error scenario here
+            showMessage('Operation failed. Please try again.'); // Implement showMessage to handle user feedback
         } finally {
-            setLoader(false);
+            setLoader(false); // Hide loading indicator
         }
     };
 
@@ -474,7 +501,7 @@ const AllVendors = () => {
                                         <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editVendor(vendor)}>
                                             Edit
                                         </button>
-                                        <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteVendor()}>
+                                        <button type="button" className="btn btn-outline-danger w-1/2" onClick={() => deleteVendor(vendor.id)}>
                                             Delete
                                         </button>
                                     </div>

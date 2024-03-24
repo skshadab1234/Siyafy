@@ -5,6 +5,9 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const authenticate = require("../lib");
 const multer = require("multer");
+const sendEmail = require("./nodemailer");
+const fs = require("fs");
+
 app.use(express.json());
 
 app.use(cors());
@@ -66,8 +69,24 @@ app.post("/vendors/all", authenticate, async (req, res) => {
     const data = dataResult.rows;
     const totalCount = totalResult.rows[0].count;
 
+    // For each vendor, run a separate query to count the number of stores
+    const vendorsWithStoreCount = await Promise.all(
+      data.map(async (vendor) => {
+        const queryStoreCount = {
+          text: `
+      SELECT COUNT(*) FROM stores WHERE stores.vendor_id = $1
+    `,
+          values: [vendor.id],
+        };
+        const storeCountResult = await pool.query(queryStoreCount);
+        return { ...vendor, store_count: storeCountResult.rows[0].count };
+      })
+    );
+
     // Send the result back to the client
-    res.json({ data, totalCount });
+    res.json({ data: vendorsWithStoreCount, totalCount });
+    // Send the result back to the client
+    // res.json({ data, totalCount });
   } catch (error) {
     console.error("Error fetching vendors:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -174,12 +193,114 @@ app.post("/vendors/add", authenticate, async (req, res) => {
       ]
     );
 
+    const htmlTemplate = fs.readFileSync(
+      "./html/account_creation.html",
+      "utf8"
+    );
+
+    const finalHtml = htmlTemplate
+      .replace("[user_name]", name)
+      .replace("[user_email]", email)
+      .replace("[user_password]", randomPassword);
+
+    await sendEmail(email, "Account Created Succesffully", finalHtml);
     // Send success response
     res
       .status(200)
       .json({ message: "Vendor added successfully", data: rows?.[0] });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/vendors/edit", authenticate, async (req, res) => {
+  try {
+    // Extract vendorId and values from the request body
+    const { vendorId, values } = req.body;
+
+    // Destructure the values object to individual variables
+    const {
+      name,
+      email,
+      phone_number,
+      website_url,
+      about_company,
+      is_multiple_shop,
+      vendor_status,
+      contact_person_name,
+      contact_person_email,
+      company_name,
+      business_type,
+      industry,
+      head_office_address_line1,
+      head_office_address_line2,
+      head_office_city,
+      head_office_state,
+      head_office_country,
+      head_office_zipcode,
+    } = values;
+
+    // Optionally, check if the email has been changed and if the new email already exists in the database
+    // This step is optional and depends on whether you allow changing the email and how you handle unique constraints
+
+    // Update the data in the table
+    const query = `
+      UPDATE vendors_registration
+      SET
+        name = $1,
+        email = $2,
+        phone_number = $3,
+        website_url = $4,
+        about_company = $5,
+        is_multiple_shop = $6,
+        vendor_status = $7,
+        contact_person_name = $8,
+        contact_person_email = $9,
+        company_name = $10,
+        business_type = $11,
+        industry = $12,
+        head_office_address_line1 = $13,
+        head_office_address_line2 = $14,
+        head_office_city = $15,
+        head_office_state = $16,
+        head_office_country = $17,
+        head_office_zipcode = $18
+      WHERE id = $19
+      RETURNING *;
+    `;
+    const { rows } = await pool.query(query, [
+      name,
+      email,
+      phone_number,
+      website_url,
+      about_company,
+      is_multiple_shop,
+      vendor_status,
+      contact_person_name,
+      contact_person_email,
+      company_name,
+      business_type,
+      industry,
+      head_office_address_line1,
+      head_office_address_line2,
+      head_office_city,
+      head_office_state,
+      head_office_country,
+      head_office_zipcode,
+      vendorId, // Make sure this is the last parameter as per the query placeholders
+    ]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Vendor not found" });
+    }
+
+    // Send success response
+    res
+      .status(200)
+      .json({ message: "Vendor updated successfully", data: rows[0] });
+  } catch (error) {
+    console.error("Error updating vendor:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -296,15 +417,13 @@ const uploadStore = multer({
 
 app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
   try {
-    let store_media_filename, banner_media_filename;
-
-    console.log(req.body.selectedRow);
-    return
     // Check if files are uploaded
+    let store_media_filename, banner_media_filename;
     store_media_filename = req.files?.[0]?.filename || null;
     banner_media_filename = req.files?.[1]?.filename || null;
 
-    const vendor_id = req.body.vendor_id;
+    // Extract necessary data from the request body
+    const { data, selectedRow, vendor_id } = req.body;
     const {
       store_name,
       address,
@@ -316,58 +435,106 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
       email,
       website,
       status,
-    } = JSON.parse(req.body?.data);
+    } = JSON.parse(data);
 
-    const query = `
-      INSERT INTO stores (store_name, address, city, state, country, description, phone, email, website, logo_url, banner_url, vendor_id, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-    `;
-
-    // Execute the query
-    await pool.query(query, [
-      store_name,
-      address,
-      city,
-      state,
-      country,
-      description,
-      phone,
-      email,
-      website,
-      store_media_filename,
-      banner_media_filename,
-      vendor_id,
-      status,
-    ]);
-
-    // Check the number of stores associated with the vendor
-    const countQuery = await pool.query(
-      "SELECT COUNT(*) AS store_count FROM stores WHERE vendor_id = $1",
-      [vendor_id]
-    );
-    const storeCount = parseInt(countQuery.rows[0].store_count);
-
-    // Update the is_multiple_store flag in vendors_registration table
-    if (storeCount > 1) {
-      await pool.query(
-        "UPDATE vendors_registration SET is_multiple_shop = true WHERE id = $1",
-        [vendor_id]
-      );
+    let parsedSelectedRow = {};
+    if (selectedRow) {
+      try {
+        parsedSelectedRow = JSON.parse(selectedRow);
+      } catch (error) {
+        console.error("Error parsing selectedRow:", error);
+      }
     }
 
-    res.status(200).json({ message: "Store added successfully" });
+    if (Object.keys(parsedSelectedRow).length > 0) {
+      // If selectedRow is provided, it means we're editing an existing store
+      const query = `
+        UPDATE stores 
+        SET 
+          store_name = $1,
+          address = $2,
+          city = $3,
+          state = $4,
+          country = $5,
+          description = $6,
+          phone = $7,
+          email = $8,
+          website = $9,
+          logo_url = $10,
+          banner_url = $11,
+          status = $12
+        WHERE 
+          store_id = $13
+        RETURNING *
+      `;
+
+      // Execute the query to update store data
+      const { rows } = await pool.query(query, [
+        store_name,
+        address,
+        city,
+        state,
+        country,
+        description,
+        phone,
+        email,
+        website,
+        store_media_filename,
+        banner_media_filename,
+        status ? 1 : 0,
+        parsedSelectedRow.store_id, // Assuming the unique identifier of the store is 'id'
+      ]);
+
+      return res
+        .status(200)
+        .json({ message: "Store updated successfully", data: rows[0] });
+    } else {
+      // Check if a store with the same name and vendor_id already exists
+      const existingStoreQuery = await pool.query(
+        "SELECT * FROM stores WHERE store_name = $1 AND vendor_id = $2",
+        [store_name.trim(), vendor_id]
+      );
+
+      if (existingStoreQuery.rows.length > 0) {
+        return res.status(400).json({
+          error: "A store with the same name already exists for this vendor",
+        });
+      }
+
+      // If selectedRow is not provided, it means we're adding a new store
+      const query = `
+        INSERT INTO stores 
+          (store_name, address, city, state, country, description, phone, email, website, logo_url, banner_url, status,vendor_id)
+        VALUES 
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        RETURNING *
+      `;
+
+      // Execute the query to insert new store data
+      const { rows } = await pool.query(query, [
+        store_name,
+        address,
+        city,
+        state,
+        country,
+        description,
+        phone,
+        email,
+        website,
+        store_media_filename,
+        banner_media_filename,
+        status ? 1 : 0,
+        vendor_id,
+      ]);
+
+      return res
+        .status(200)
+        .json({ message: "Store added successfully", data: rows[0] });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-app.put("/vendors/store/edit", uploadStore.array("file"), async (req, res) => {
-  try {
-    console.log(req.body);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 module.exports = app;

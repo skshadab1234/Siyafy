@@ -2,12 +2,11 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const port = 3002;
-
-const admin = require("./routes/admin");
-const vendors = require("./routes/vendors");
-const authenticate = require("./lib");
 const path = require("path");
 
+// Routes 
+const admin = require("./routes/admin");
+const vendors = require("./routes/vendors");
 
 app.use(express.json()); // Middleware para parsear el body
 app.use(cors());

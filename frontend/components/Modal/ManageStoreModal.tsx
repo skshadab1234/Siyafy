@@ -6,11 +6,11 @@ const ManageStoreModal = ({ visible, onClose, onsubmit, submitting, form, select
     const [fileList, setFileList] = useState([]);
     const [bannerfileList, setBannerFileList] = useState([]);
 
-useEffect(() => {
-    if(selectedRow){
-        form.setFieldsValue(selectedRow)
-    }
-}, [selectedRow])
+    useEffect(() => {
+        if (selectedRow) {
+            form.setFieldsValue(selectedRow);
+        }
+    }, [selectedRow]);
     const handleBeforeUpload = (file) => {
         // Check file type and size before uploading
         const isImage = file.type === 'image/jpeg' || file.type === 'image/png';
@@ -109,7 +109,7 @@ useEffect(() => {
 
                     <Col span={12}>
                         <Form.Item name="status" label="Status">
-                            <Switch className='bg-gray-500'/>
+                            <Switch className="bg-gray-500" />
                         </Form.Item>
                     </Col>
                     <Col span={16}>
