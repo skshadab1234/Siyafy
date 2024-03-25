@@ -98,7 +98,6 @@ const AllVendors = () => {
                             alt="vendor_image"
                             width={50}
                             height={50}
-                            
                         />
 
                         <div
@@ -110,7 +109,8 @@ const AllVendors = () => {
                         >
                             <IconEdit className="cursor-pointer text-gray-500" />
                         </div>
-                        <div className='ml-2'>
+                        <div className="ml-2">
+                            <h2 className="font-semibold text-gray-800 hover:dark:text-black ">VID: {record.id}</h2>
                             <h2 className="font-semibold text-gray-800 hover:dark:text-black ">{record.name}</h2>
 
                             <p>Stores : {record.store_count}</p>
@@ -205,7 +205,7 @@ const AllVendors = () => {
                     <div className="flex cursor-pointer items-center  gap-2 " onClick={() => editVendor(record)}>
                         <IconEdit />
                     </div>
-                    <div className="cursor-pointer" onClick={() => router.push(`/vendors/view/${record.id}`)}>
+                    <div className="cursor-pointer" onClick={() => router.push(`/admin/vendors/view/${record.id}`)}>
                         <EyeIcon className="text-gray-700" />
                     </div>
                 </div>
@@ -271,6 +271,8 @@ const AllVendors = () => {
                 }
             },
             onCancel() {
+                setSelectedRowkeys([]);
+
                 // Do nothing if cancelled
                 console.log('Deletion cancelled');
             },
@@ -294,6 +296,7 @@ const AllVendors = () => {
     };
 
     const handleCancel = () => {
+        setSelectedRowkeys([]);
         setModalVisible(false);
     };
 
@@ -320,6 +323,10 @@ const AllVendors = () => {
                 body: requestBody,
             });
 
+            if(res.status === 400){
+                showMessage('Email already exists', 'error');
+                return
+            }
             if (!res.ok) {
                 throw new Error(`Failed to ${selectedKey ? 'update' : 'add'} vendor`);
             }
@@ -512,12 +519,13 @@ const AllVendors = () => {
                 ) : (
                     <div className="mt-5">
                         <Table
+                            className="border bg-white dark:border-[#0E1726] dark:!bg-[#0E1726]"
                             scroll={{
                                 x: 1200,
                                 y: 600,
                             }}
                             title={() => (
-                                <div className="mt-2 flex w-1/2 gap-2 ltr:left-0 rtl:right-0">
+                                <div className="mt-2 flex w-1/2  gap-2 ltr:left-0 rtl:right-0">
                                     {/* <button type="button" className="btn btn-outline-primary w-1/2" onClick={() => editVendor(vendor)}>
                                         Edit
                                     </button> */}
@@ -526,7 +534,7 @@ const AllVendors = () => {
                                     </button>
                                 </div>
                             )}
-                            rowClassName={'dark:bg-slate-900 hover:dark:text-black dark:text-white'}
+                            rowClassName={'dark:bg-slate-900 hover:dark:text-black dark:text-white '}
                             dataSource={vendors}
                             columns={columns}
                             pagination={false}

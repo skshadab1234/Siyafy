@@ -5,6 +5,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:where(.css-dev-only-do-not-override-djtmh8).ant-table-wrapper .ant-table{
+    background: transparent !important
+}
+
 @layer components {
     html {
         @apply scroll-smooth;

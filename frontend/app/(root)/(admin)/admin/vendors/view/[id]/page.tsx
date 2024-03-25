@@ -210,7 +210,7 @@ const ViewVendor = () => {
     };
     return (
         <div>
-            <div className=" items-center gap-4 bg-white p-4 shadow-md  md:flex">
+            <div className=" items-center gap-4 bg-white dark:bg-slate-900  p-4 shadow-md  md:flex">
                 <div>
                     <img
                         className="h-12 w-12 rounded-full"
@@ -272,7 +272,7 @@ const ViewVendor = () => {
                     <p className="mt-4 px-2 text-justify text-lg">{vendorData?.about_company}</p>
                 </div>
             </div> */}
-            <div className="my-4 w-full bg-white p-4 shadow-lg">
+            <div className="my-4 w-full bg-white dark:bg-slate-900 p-4 shadow-lg">
                 <div className="flex items-center justify-between">
                     <Heading title={`Stores (${vendorData?.stores?.length})`} />
                     <h2 onClick={() => handleOpenModal(null)} className="flex cursor-pointer items-center justify-center gap-2 text-xl text-blue-600">
@@ -283,9 +283,9 @@ const ViewVendor = () => {
                 {!vendorData ? (
                     renderSkeleton()
                 ) : vendorData?.stores?.length > 0 ? (
-                    <div className="plait  mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="plait mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                         {vendorData?.stores?.map((store: any) => (
-                            <div className=" rounded-md border">
+                            <div className=" rounded-md border dark:border-slate-700">
                                 <img
                                     src={`${process.env.ADMINURL}/upload/storeMedia/${store.banner_url}`}
                                     onError={(e) => {
@@ -312,14 +312,14 @@ const ViewVendor = () => {
                                         <button
                                             onClick={() => handleOpenModal(store)}
                                             type="button"
-                                            className="mt-4 flex w-full items-center justify-center gap-2 py-2  rounded-sm border border-slate-900 px-2 text-sm font-semibold text-slate-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                                            className="mt-4 flex w-full items-center justify-center gap-2 py-2  rounded-sm border dark:border-slate-600 px-2 text-sm font-semibold dark:text-white text-slate-900 shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
                                         >
                                             Edit &nbsp; <PencilIcon className="h-4 w-4" />
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => openLink(store.website)}
-                                            className="mt-4 flex w-full items-center justify-center gap-2 py-2 rounded-sm bg-black px-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black group"
+                                            className="mt-4 flex w-full items-center justify-center gap-2 py-2 rounded-sm dark:bg-slate-600 bg-black px-2 text-sm font-semibold text-white shadow-sm hover:bg-black/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black group"
                                         >
                                             Visit Shop &nbsp; <ArrowUpRight className="h-4 w-4 group-hover:scale-110" />
                                         </button>

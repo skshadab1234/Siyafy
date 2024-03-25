@@ -15,7 +15,6 @@ app.use((req, res, next) => {
 
 app.post("/adminlogin", async (req, res) => {
   try {
-    console.log('hello');
     const { email, password } = req.body;
 
     const result = await req.pool.query(

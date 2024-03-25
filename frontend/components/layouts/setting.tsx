@@ -38,7 +38,7 @@ const Setting = () => {
                             <IconX className="h-5 w-5" />
                         </button>
 
-                        <h4 className="mb-1 dark:text-white">TEMPLATE CUSTOMIZER</h4>
+                        <h4 className="mb-1 dark:text-white uppercase">{process.env.WEBSITE_NAME} THEME CUSTOMIZER</h4>
                         <p className="text-white-dark">Set preferences that will be cookied for your live preview demonstration.</p>
                     </div>
 

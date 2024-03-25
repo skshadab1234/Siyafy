@@ -7,6 +7,7 @@ const authenticate = require("../lib");
 const multer = require("multer");
 const sendEmail = require("./nodemailer");
 const fs = require("fs");
+const slugify = require('slugify');
 
 app.use(express.json());
 
@@ -437,6 +438,7 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
       status,
     } = JSON.parse(data);
 
+    
     let parsedSelectedRow = {};
     if (selectedRow) {
       try {
@@ -452,25 +454,27 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
         UPDATE stores 
         SET 
           store_name = $1,
-          address = $2,
-          city = $3,
-          state = $4,
-          country = $5,
-          description = $6,
-          phone = $7,
-          email = $8,
-          website = $9,
-          logo_url = $10,
-          banner_url = $11,
-          status = $12
+          store_slug = $2, 
+          address = $3,
+          city = $4,
+          state = $5,
+          country = $6,
+          description = $7,
+          phone = $8,
+          email = $9,
+          website = $10,
+          logo_url = $11,
+          banner_url = $12,
+          status = $13
         WHERE 
-          store_id = $13
+          store_id = $14
         RETURNING *
       `;
 
       // Execute the query to update store data
       const { rows } = await pool.query(query, [
         store_name,
+        slugify(store_name), // Generate and set store_slug
         address,
         city,
         state,
@@ -504,15 +508,16 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
       // If selectedRow is not provided, it means we're adding a new store
       const query = `
         INSERT INTO stores 
-          (store_name, address, city, state, country, description, phone, email, website, logo_url, banner_url, status,vendor_id)
+          (store_name, store_slug, address, city, state, country, description, phone, email, website, logo_url, banner_url, status, vendor_id)
         VALUES 
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING *
       `;
 
       // Execute the query to insert new store data
       const { rows } = await pool.query(query, [
         store_name,
+        slugify(store_name), // Generate and set store_slug
         address,
         city,
         state,
@@ -536,5 +541,6 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
 
 module.exports = app;

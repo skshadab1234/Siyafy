@@ -188,7 +188,7 @@ const Sidebar = () => {
                             </h2>
 
                             <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === '/vendors/all' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('/vendors/all')}>
+                                <button type="button" className={`${currentMenu === '/admin/vendors/all' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('/admin/vendors/all')}>
                                     <div className="flex items-center">
                                         <IconUserPlus className="shrink-0 group-hover:!text-primary" />
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">
@@ -196,15 +196,15 @@ const Sidebar = () => {
                                         </span>
                                     </div>
 
-                                    <div className={currentMenu !== '/vendors/all' ? '-rotate-90 rtl:rotate-90' : ''}>
+                                    <div className={currentMenu !== '/admin/vendors/all' ? '-rotate-90 rtl:rotate-90' : ''}>
                                         <IconCaretDown />
                                     </div>
                                 </button>
 
-                                <AnimateHeight duration={300} height={currentMenu === '/vendors/all' ? 'auto' : 0}>
+                                <AnimateHeight duration={300} height={currentMenu === '/admin/vendors/all' ? 'auto' : 0}>
                                     <ul className="sub-menu text-gray-500">
                                         <li>
-                                            <Link href="/vendors/all">{t('All Vendors')}</Link>
+                                            <Link href="/admin/vendors/all">{t('All Vendors')}</Link>
                                         </li>
                                     </ul>
                                 </AnimateHeight>
