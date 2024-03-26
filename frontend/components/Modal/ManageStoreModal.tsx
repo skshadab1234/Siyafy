@@ -11,6 +11,7 @@ const ManageStoreModal = ({ visible, onClose, onsubmit, submitting, form, select
             form.setFieldsValue(selectedRow);
         }
     }, [selectedRow]);
+    
     const handleBeforeUpload = (file) => {
         // Check file type and size before uploading
         const isImage = file.type === 'image/jpeg' || file.type === 'image/png';

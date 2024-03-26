@@ -47,9 +47,9 @@ const VendorSidebar = () => {
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
     const stores = useSelector((state: IRootState) => state.vendor);
 
-    console.log(stores);
-
     const toggleMenu = (value: string) => {
+        console.log(value);
+
         setCurrentMenu((oldValue) => {
             return oldValue === value ? '' : value;
         });
@@ -119,23 +119,45 @@ const VendorSidebar = () => {
                         <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
                             <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
                                 <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('Stores')} ({stores?.stores?.length})</span>
+                                <span>
+                                    {t('Stores')} ({stores?.stores?.length || 0})
+                                </span>
                             </h2>
 
-                            <li className="nav-item">
-                                <ul>
-                                    {stores?.stores?.map((item) => (
-                                        <li className="nav-item" key={item.store_id}>
-                                            <Link href={`/vendor/${(item.store_slug)}`} className="group">
-                                                <div className="flex items-center">
-                                                    <Store className="shrink-0 group-hover:!text-primary" />
-                                                    <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t(`${item.store_name}`)}</span>
-                                                </div>
-                                            </Link>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </li>
+                            {stores?.stores?.map((item) => (
+                                <li className="menu nav-item">
+                                    <button
+                                        type="button"
+                                        className={`${currentMenu.startsWith(`/vendor/${item.store_slug}`) ? 'active' : ''} nav-link group w-full`}
+                                        onClick={() => toggleMenu(`/vendor/${item.store_slug}`)}
+                                    >
+                                        <div className="flex items-center">
+                                            <Store className="shrink-0 group-hover:!text-primary" />
+                                            <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t(item.store_name)}</span>
+                                        </div>
+
+                                        <div className={`${!currentMenu.startsWith(`/vendor/${item.store_slug}`) ? '-rotate-90 rtl:rotate-90' : ''}`}>
+                                            <IconCaretDown />
+                                        </div>
+                                    </button>
+
+                                    <AnimateHeight duration={300} height={currentMenu.startsWith(`/vendor/${item.store_slug}`) ? 'auto' : 0}>
+                                        <ul className="sub-menu text-gray-500">
+                                            <li className={currentMenu === `/vendor/${item.store_slug}` && 'text-blue-800'}>
+                                                <Link href={`/vendor/${item.store_slug}`}>{`Dashboard`}</Link>
+                                            </li>
+
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/customer` && 'text-blue-800'}>
+                                                <Link href={`/vendor/${item.store_slug}/managecustomer`}>{`Manage Customer`}</Link>
+                                            </li>
+
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/api` && 'text-blue-800'}>
+                                                <Link href={`/vendor/${item.store_slug}/api`}>{`Api Key`}</Link>
+                                            </li>
+                                        </ul>
+                                    </AnimateHeight>
+                                </li>
+                            ))}
                         </ul>
                     </PerfectScrollbar>
                 </div>

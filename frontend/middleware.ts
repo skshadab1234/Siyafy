@@ -6,61 +6,48 @@ const publicRoutes = ['/'];
 const authRoutes = ['/admin-login'];
 const protectedRoutes = ['/admin', '/vendors/all'];
 
+// Added pattern matching for dynamic vendor setting route
+const dynamicVendorSettingRoutePattern = /^\/vendor\/[^\/]+\/api$/;
+const dynamicVendorManageCustomerRoutePattern = /^\/vendor\/[^\/]+\/managecustomer$/;
 
-// ROUTES OF ARRAY FOR VENDORS SCREENS
-// const vendorPublicRoute = ['/vendor']
-const vendorAuthRoutes = ['/vendor-login']
-const vendorProtectedRoutes = ['/vendor']
+
+const vendorAuthRoutes = ['/vendor-login'];
+// Including the dynamic route pattern in the protection logic, hence not listing it here as a string
+const vendorProtectedRoutes = ['/vendor'];
 
 export function middleware(request: NextRequest) {
-    // Check if the 'tokenSagartech' cookie exists
     const tokenSagartech = request.cookies.get('tokenSagartech');
     const tokenVendorsSagartech = request.cookies.get('tokenVendorsSagartech');
+    const { pathname } = request.nextUrl;
 
-    // Check the request path against the arrays to decide the action
-    if (publicRoutes.includes(request.nextUrl.pathname)) {
-        // If the request is for a public route, continue with the request
+    if (publicRoutes.includes(pathname)) {
         return NextResponse.next();
-    } else if (authRoutes.includes(request.nextUrl.pathname)) {
-        // If the request is for an authenticated route and the cookie exists, redirect to the first public route
+    } else if (authRoutes.includes(pathname)) {
         if (tokenSagartech) {
-            // Construct an absolute URL for the redirect, excluding the port in production
             const redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.hostname}${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}${protectedRoutes[0]}`;
             return NextResponse.redirect(redirectUrl);
-        } else {
-            // If the cookie does not exist, continue with the request
-            return NextResponse.next();
         }
-    } else if (protectedRoutes.includes(request.nextUrl.pathname)) {
-        // If the request is for a protected route and the cookie exists, continue with the request
+        return NextResponse.next();
+    } else if (protectedRoutes.includes(pathname)) {
         if (tokenSagartech) {
             return NextResponse.next();
-        } else {
-            // Construct an absolute URL for the redirect to the admin login page, excluding the port in production
-            const redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.hostname}${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}/admin-login`;
-            return NextResponse.redirect(redirectUrl);
         }
-    } else if (vendorAuthRoutes.includes(request.nextUrl.pathname)) {
-        // If the request is for an authenticated route and the cookie exists, redirect to the first public route
+        const redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.hostname}${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}/admin-login`;
+        return NextResponse.redirect(redirectUrl);
+    } else if (vendorAuthRoutes.includes(pathname)) {
         if (tokenVendorsSagartech) {
-            // Construct an absolute URL for the redirect, excluding the port in production
             const redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.hostname}${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}${vendorProtectedRoutes[0]}`;
             return NextResponse.redirect(redirectUrl);
-        } else {
-            // If the cookie does not exist, continue with the request
-            return NextResponse.next();
         }
-    } else if (vendorProtectedRoutes.includes(request.nextUrl.pathname)) {
-        // If the request is for a protected route and the cookie exists, continue with the request
+        return NextResponse.next();
+    } else if (vendorProtectedRoutes.includes(pathname) || dynamicVendorSettingRoutePattern.test(pathname) || dynamicVendorManageCustomerRoutePattern.test(pathname)) {
+        // This now also checks if the pathname matches the dynamic route pattern
         if (tokenVendorsSagartech) {
             return NextResponse.next();
-        } else {
-            // Construct an absolute URL for the redirect to the admin login page, excluding the port in production
-            const redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.hostname}${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}/vendor-login`;
-            return NextResponse.redirect(redirectUrl);
         }
-    } 
+        const redirectUrl = `${request.nextUrl.protocol}//${request.nextUrl.hostname}${request.nextUrl.port ? `:${request.nextUrl.port}` : ''}/vendor-login`;
+        return NextResponse.redirect(redirectUrl);
+    }
 
-    // Default action if the request does not match any of the defined routes
     return NextResponse.next();
 }
