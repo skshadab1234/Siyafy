@@ -147,7 +147,7 @@ const VendorSidebar = () => {
                                                 <Link href={`/vendor/${item.store_slug}`}>{`Dashboard`}</Link>
                                             </li>
 
-                                            <li className={currentMenu === `/vendor/${item.store_slug}/customer` && 'text-blue-800'}>
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/managecustomer` && 'text-blue-800'}>
                                                 <Link href={`/vendor/${item.store_slug}/managecustomer`}>{`Manage Customer`}</Link>
                                             </li>
 

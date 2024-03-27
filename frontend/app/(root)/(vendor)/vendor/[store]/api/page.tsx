@@ -1,16 +1,63 @@
 'use client';
 import { Adminurl } from '@/app/layout';
 import { getCookie } from '@/components/layouts/header';
+import { checkStoreExists } from '@/components/utils/checkStoreExists';
+import { IRootState } from '@/store';
 import { Button, Table, message } from 'antd';
 import { Copy, CopyPlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 
 const ApiKey = ({ params }: { params: { store: string } }) => {
     const token = getCookie('tokenVendorsSagartech');
-
     const [loadAPis, setAPis] = useState([]);
 
+    const vendorData = useSelector((state: IRootState) => state.vendor);
+    const router = useRouter();
+    useEffect(() => {
+        if (vendorData?.id && params.store) {
+            checkStoreExists(vendorData.id, params.store).then((storeExists) => {
+                console.log(storeExists);
+
+                if (!storeExists?.success) {
+                    router.push('/');
+                    return;
+                }
+            });
+        }
+    }, [vendorData, params]);
+    // const checkStoreExists = async () => {
+    //     try {
+    //         const res = await fetch(`${process.env.ADMINURL}/api/checkStoreExists/${vendorData?.id}/${params.store}`);
+    //         if (res.ok) {
+    //             const data = await res.json();
+    //             if (!data.success) {
+    //                 // Store does not exist, redirect to /vendor
+    //                 router.push('/vendor');
+    //             } else {
+    //                 // Store exists
+    //                 setStoreExists(true);
+    //             }
+    //         } else {
+    //             // Handle server error
+    //             console.error('Server error:', res.statusText);
+    //         }
+    //     } catch (error) {
+    //         // Handle fetch error
+    //         console.error('Fetch error:', error);
+    //     } finally {
+    //         // Set loading to false once the request is completed
+    //         setLoading(false);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     if (vendorData && vendorData.id) {
+    //         checkStoreExists();
+    //     }
+    // }, [vendorData]);
     const showMessage = (msg = '', type = 'success') => {
         const toast: any = Swal.mixin({
             toast: true,
@@ -40,7 +87,7 @@ const ApiKey = ({ params }: { params: { store: string } }) => {
             const res = await response.json();
             if (res.success) {
                 showMessage(res.message, 'success');
-                getApiKey()
+                getApiKey();
             } else {
                 showMessage(res.error, 'error');
             }
@@ -113,7 +160,7 @@ const ApiKey = ({ params }: { params: { store: string } }) => {
                 </Button>
             </div>
 
-            <div className='mt-10  dark:bg-slate-950 text-white'>
+            <div className="mt-10  text-white dark:bg-slate-950">
                 <Table columns={columns} dataSource={loadAPis} />
             </div>
         </div>

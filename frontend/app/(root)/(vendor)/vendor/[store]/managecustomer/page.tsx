@@ -3,14 +3,36 @@
 import { Button, Form, Modal, Table } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import CustomerForm from '@/components/Modal/CustomerForm';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getCookie } from '@/components/layouts/header';
 import Swal from 'sweetalert2';
+import { useSelector } from 'react-redux';
+import { IRootState } from '@/store';
+import { useRouter } from 'next/navigation';
+import { checkStoreExists } from '@/components/utils/checkStoreExists';
 
 const Managecustomer = ({ params }: { params: { store: string } }) => {
     const [modalVisible, setModalVisible] = useState(false);
+    const [customers, setCustomers] = useState(null);
+
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
+
+    const vendorData = useSelector((state: IRootState) => state.vendor);
+    const router = useRouter();
+
+    useEffect(() => {
+        if (vendorData?.id && params.store) {
+            checkStoreExists(vendorData.id, params.store).then((storeExists) => {
+                console.log(storeExists);
+
+                if (!storeExists?.success) {
+                    router.push('/');
+                    return;
+                }
+            });
+        }
+    }, [vendorData, params]);
 
     const handleCreate = () => {
         setModalVisible(true);
@@ -44,16 +66,18 @@ const Managecustomer = ({ params }: { params: { store: string } }) => {
             body: formData,
         })
             .then(async (response) => {
+                const data = await response.json();
+
                 if (!response.ok) {
-                    const data = await response.json();
                     setLoading(false);
 
                     showMessage(data.error || 'An error occurred', 'error');
                     return;
                 }
 
+
                 showMessage('Customer added successfully', 'success');
-                form.resetFields()
+                form.resetFields();
                 setLoading(false);
 
                 setModalVisible(false);
@@ -82,6 +106,64 @@ const Managecustomer = ({ params }: { params: { store: string } }) => {
         });
     };
 
+    const fetchCustomers = async () => {
+        setLoading(true);
+        try {
+            const token = getCookie('tokenVendorsSagartech');
+            const response = await fetch(`${process.env.ADMINURL}/api/vendors/customers/${vendorData.id}/${params.store}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setCustomers(data);
+            } else {
+                // Handle non-200 response
+                console.error('Error:', response.statusText);
+            }
+        } catch (error) {
+            // Handle fetch error
+            console.error('Fetch error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        vendorData?.id && params.store && fetchCustomers();
+    }, [vendorData, params.store]); // Trigger fetchCustomers whenever params.store changes
+
+    const columns = [
+        {
+            title: 'Customer ID',
+            dataIndex: 'customer_id',
+            key: 'customer_id',
+        },
+        {
+            title: 'First Name',
+            dataIndex: 'first_name',
+            key: 'first_name',
+        },
+        {
+            title: 'Last Name',
+            dataIndex: 'last_name',
+            key: 'last_name',
+        },
+        {
+            title: 'Email',
+            dataIndex: 'email',
+            key: 'email',
+        },
+        {
+            title: 'Phone',
+            dataIndex: 'phone',
+            key: 'phone',
+        },
+        // Add more columns as needed
+    ];
+
     return (
         <div>
             <div className="flex items-center justify-between">
@@ -91,7 +173,7 @@ const Managecustomer = ({ params }: { params: { store: string } }) => {
                 </Button>
             </div>
 
-            <Table />
+            <Table columns={columns} dataSource={customers} />
             <CustomerForm form={form} loading={loading} onsubmit={handleSubmit} modalVisible={modalVisible} onCancel={handleCancel} />
         </div>
     );

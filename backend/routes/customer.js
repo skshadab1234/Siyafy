@@ -90,9 +90,9 @@ async function insertCustomer(
         first_name, last_name, email, phone, address_country,
         address_company, address_line1, address_line2, city, state,
         pin_code, phone_number_address, note, collect_taxes, customer_media, vendor_id, store_name
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) RETURNING *
     `;
-  await pool.query(insertQuery, [
+  const { rows:InsertRow } = await pool.query(insertQuery, [
     first_name,
     last_name,
     email,
@@ -111,6 +111,8 @@ async function insertCustomer(
     vendor_id,
     store_name,
   ]);
+
+  return InsertRow
 }
 
 app.post(
@@ -123,7 +125,7 @@ app.post(
       const { data, store_name } = req.body;
       const customerData = JSON.parse(data);
 
-      await insertCustomer(
+      const InsertRow = await insertCustomer(
         customerData,
         customer_media,
         req.userId,
@@ -132,7 +134,7 @@ app.post(
 
       res
         .status(200)
-        .json({ success: true, message: "Customer added successfully" });
+        .json({ success: true, message: "Customer added successfully", data: InsertRow });
     } catch (error) {
       console.log(error);
       if (error.message === "Email already exists for this vendor and store") {
@@ -143,5 +145,26 @@ app.post(
     }
   }
 );
+
+app.get("/vendors/customers/:id/:store", async (req, res) => {
+  try {
+    const { id, store } = req.params;
+
+    // Construct the SQL query to fetch customers based on vendor ID and store name
+    const query = {
+      text: "SELECT * FROM customers WHERE vendor_id = $1 AND store_name = $2",
+      values: [id, store],
+    };
+
+    // Execute the query
+    const result = await pool.query(query);
+
+    // Send the fetched customers as a JSON response
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = app;

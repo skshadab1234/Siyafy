@@ -30,9 +30,6 @@ const CustomerForm = ({ modalVisible, onCancel, onsubmit, loading, form }: { mod
             });
     };
 
-
-    console.log(fileList);
-    
     return (
         <Modal title="Create New Customer" visible={modalVisible} onCancel={onCancel} footer={null}>
             <Form form={form} name="customer_form" onFinish={handleSubmit} layout="vertical" className='mt-10'>
