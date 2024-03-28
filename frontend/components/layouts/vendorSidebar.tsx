@@ -154,6 +154,10 @@ const VendorSidebar = () => {
                                             <li className={currentMenu === `/vendor/${item.store_slug}/api` && 'text-blue-800'}>
                                                 <Link href={`/vendor/${item.store_slug}/api`}>{`Api Key`}</Link>
                                             </li>
+
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/docs` && 'text-blue-800'}>
+                                                <Link href={`/vendor/${item.store_slug}/docs`}>{`Documentation`}</Link>
+                                            </li>
                                         </ul>
                                     </AnimateHeight>
                                 </li>

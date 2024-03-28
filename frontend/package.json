@@ -18,6 +18,8 @@
         "@types/react": "18.0.27",
         "@types/react-dom": "18.0.10",
         "antd": "^5.15.3",
+        "antd-img-crop": "^4.21.0",
+        "country-state-city": "^3.2.1",
         "eslint": "8.32.0",
         "eslint-config-next": "13.1.2",
         "i18next": "^22.4.10",

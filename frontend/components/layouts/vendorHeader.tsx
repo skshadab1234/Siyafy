@@ -6,27 +6,19 @@ import { IRootState } from '@/store';
 import { toggleTheme, toggleSidebar, toggleRTL } from '@/store/themeConfigSlice';
 import Dropdown from '@/components/dropdown';
 import IconMenu from '@/components/icon/icon-menu';
-import IconSearch from '@/components/icon/icon-search';
-import IconXCircle from '@/components/icon/icon-x-circle';
 import IconSun from '@/components/icon/icon-sun';
 import IconMoon from '@/components/icon/icon-moon';
-import IconMailDot from '@/components/icon/icon-mail-dot';
-import IconArrowLeft from '@/components/icon/icon-arrow-left';
-import IconInfoCircle from '@/components/icon/icon-info-circle';
-import IconBellBing from '@/components/icon/icon-bell-bing';
 import IconUser from '@/components/icon/icon-user';
-import IconMail from '@/components/icon/icon-mail';
-import IconLockDots from '@/components/icon/icon-lock-dots';
 import IconLogout from '@/components/icon/icon-logout';
 import IconMenuDashboard from '@/components/icon/menu/icon-menu-dashboard';
 import IconCaretDown from '@/components/icon/icon-caret-down';
 import IconMenuApps from '@/components/icon/menu/icon-menu-apps';
-import { usePathname, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { getTranslation } from '@/i18n';
-import { Adminurl } from '@/app/layout';
-import { addAdmin } from '@/store/adminslice';
 import { Avatar } from 'antd';
 import { addVendor } from '@/store/vendorSlice';
+import IconMenuDocumentation from '../icon/menu/icon-menu-documentation';
+import { CodeIcon } from 'lucide-react';
 
 export function getCookie(name: string): string | undefined {
     const value = `; ${document.cookie}`;
@@ -41,6 +33,7 @@ export function getCookie(name: string): string | undefined {
 
 const VendorHeader = () => {
     const pathname = usePathname();
+
     const dispatch = useDispatch();
     const router = useRouter();
     const { t, i18n } = getTranslation();
@@ -100,7 +93,7 @@ const VendorHeader = () => {
         if (res.ok) {
             const data = await res.json();
             console.log(data);
-            
+
             dispatch(addVendor(data?.data));
         }
     };
@@ -126,6 +119,7 @@ const VendorHeader = () => {
     function createMarkup(messages: any) {
         return { __html: messages };
     }
+
     const [messages, setMessages] = useState([
         {
             id: 1,
@@ -194,10 +188,9 @@ const VendorHeader = () => {
                             </li>
                         </ul>
                     </div> */}
+
                     <div className="flex items-center space-x-1.5 ltr:ml-auto rtl:mr-auto rtl:space-x-reverse dark:text-[#d0d2d6] sm:flex-1 ltr:sm:ml-0 sm:rtl:mr-0 lg:space-x-2">
-                        <div className="sm:ltr:mr-auto sm:rtl:ml-auto">
-                            
-                        </div>
+                        <div className="flex items-center justify-center sm:ltr:mr-auto sm:rtl:ml-auto"></div>
                         <div>
                             {themeConfig.theme === 'light' ? (
                                 <button
@@ -235,29 +228,20 @@ const VendorHeader = () => {
                                 </button>
                             )} */}
                         </div>
-                     
-                      
+
                         <div className="dropdown flex shrink-0">
                             <Dropdown
                                 offset={[0, 8]}
                                 placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
                                 btnClassName="relative group block"
-                                button={
-                                    <Avatar className="bg-gray-200 text-black dark:bg-slate-600 dark:text-white">
-                                        {vendorData && vendorData?.name?.charAt(0)}
-                                        
-                                    </Avatar>
-                                }
+                                button={<Avatar className="bg-gray-200 text-black dark:bg-slate-600 dark:text-white">{vendorData && vendorData?.name?.charAt(0)}</Avatar>}
                             >
                                 <ul className="w-[230px] !py-0 font-semibold text-dark dark:text-white-dark dark:text-white-light/90">
                                     <li>
                                         <div className="flex items-center px-4 py-4">
                                             {/* <img className="h-10 w-10 rounded-md object-cover" src="/assets/images/user-profile.jpeg" alt="userProfile" />
                                              */}
-                                            <Avatar>
-                                        {vendorData && vendorData?.name?.charAt(0)}
-                                                
-                                            </Avatar>
+                                            <Avatar>{vendorData && vendorData?.name?.charAt(0)}</Avatar>
                                             <div className="truncate ltr:pl-4 rtl:pr-4">
                                                 <h4 className="text-base">
                                                     {vendorData?.name}

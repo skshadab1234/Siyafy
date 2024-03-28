@@ -22,7 +22,7 @@ const ApiKey = ({ params }: { params: { store: string } }) => {
                 console.log(storeExists);
 
                 if (!storeExists?.success) {
-                    router.push('/');
+                    router.push('/vendor');
                     return;
                 }
             });
