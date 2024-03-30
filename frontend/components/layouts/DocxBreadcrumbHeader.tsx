@@ -2,13 +2,19 @@ import Link from 'next/link';
 import React from 'react';
 import IconArrowBackward from '../icon/icon-arrow-backward';
 import { useParams } from 'next/navigation';
+import { Breadcrumb } from 'antd';
 
-const DocxBreadcrumbHeader = () => {
+const DocxBreadcrumbHeader = ({items}: any) => {
     const { store } = useParams();
+    console.log(items);
+    
     return (
         <div>
-            <Link href={`/vendor/${store}`} className='flex gap-2 i items-center w-full'>
-                <p className='text-xl flex  gap-2 items-center font-semibold'><IconArrowBackward className='w-8 h-8' /> Back to Store</p>
+            <Breadcrumb items={items} />
+            <Link href={`/vendor/${store}`} className="i flex w-full items-center gap-2">
+                <p className="flex items-center  gap-2 text-xl font-semibold">
+                    <IconArrowBackward className="h-8 w-8" /> Back to Store
+                </p>
             </Link>
         </div>
     );

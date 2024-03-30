@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Breadcrumb } from 'antd';
 import Link from 'next/link';
+import DocxBreadcrumbHeader from '@/components/layouts/DocxBreadcrumbHeader';
 
 const CustomerRegistration = ({ params }: { params: { store: string } }) => {
     const vendorData = useSelector((state: IRootState) => state.vendor);
@@ -27,7 +28,7 @@ const CustomerRegistration = ({ params }: { params: { store: string } }) => {
 
     return (
         <div>
-            <Breadcrumb
+            <DocxBreadcrumbHeader
                 items={[
                     {
                         title: <Link href="/vendor">Home</Link>,

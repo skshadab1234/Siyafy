@@ -117,7 +117,7 @@ const VendorSidebarDocs = () => {
 
                                 <AnimateHeight duration={300} height={currentMenu === `/vendor/${store}/docs` ? 'auto' : 0}>
                                     <ul className="sub-menu text-gray-500">
-                                        <li className={currentMenu === `/vendor/${store}/docs` && 'text-blue-800'}>
+                                        <li className={currentMenu === `/vendor/${store}/docs` ? 'text-blue-800' : ''}>
                                             <Link href={`/vendor/${store}/docs`}>{t('Introduction')}</Link>
                                         </li>
                                     </ul>
@@ -128,22 +128,22 @@ const VendorSidebarDocs = () => {
                                 <button
                                     type="button"
                                     className={`${currentMenu === `/vendor/${store}/docs/customer/registration` ? 'active' : ''} nav-link group w-full`}
-                                    onClick={() => toggleMenu(`/vendor/${store}/docs/customer/registration`)}
+                                    onClick={() => toggleMenu(`/vendor/${store}/docs/7customer/registration`)}
                                 >
                                     <div className="flex items-center">
                                         <User2 className="shrink-0 group-hover:!text-primary" />
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('Customer')}</span>
                                     </div>
 
-                                    <div className={currentMenu !== `/vendor/${store}/docs/customer/registration` ? '-rotate-90 rtl:rotate-90' : ''}>
+                                    <div className={currentMenu !== `/vendor/${store}/docs/7customer/registration` ? '-rotate-90 rtl:rotate-90' : ''}>
                                         <IconCaretDown />
                                     </div>
                                 </button>
 
-                                <AnimateHeight duration={300} height={currentMenu === `/vendor/${store}/docs/customer/registration` ? 'auto' : 0}>
+                                <AnimateHeight duration={300} height={currentMenu === `/vendor/${store}/docs/7customer/registration` ? 'auto' : 0}>
                                     <ul className="sub-menu text-gray-500">
-                                        <li className={currentMenu === `/vendor/${store}/docs/customer/registration` && 'text-blue-800'}>
-                                            <Link href={`/vendor/${store}/docs/customer/registration`}>{t('Registration')}</Link>
+                                        <li className={currentMenu === `/vendor/${store}/docs/7customer/registration` ? 'text-blue-800' : ''}>
+                                            <Link href={`/vendor/${store}/docs/7customer/registration`}>{t('Registration')}</Link>
                                         </li>
                                     </ul>
                                 </AnimateHeight>

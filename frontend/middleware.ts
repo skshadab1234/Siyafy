@@ -10,7 +10,6 @@ const protectedRoutes = ['/admin', '/vendors/all'];
 const dynamicVendorSettingRoutePattern = /^\/vendor\/[^\/]+\/api$/;
 const dynamicVendorManageCustomerRoutePattern = /^\/vendor\/[^\/]+\/managecustomer$/;
 
-
 const vendorAuthRoutes = ['/vendor-login'];
 // Including the dynamic route pattern in the protection logic, hence not listing it here as a string
 const vendorProtectedRoutes = ['/vendor'];

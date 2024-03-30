@@ -93,6 +93,7 @@ const AllVendors = () => {
                 return (
                     <div className="flex items-center">
                         <Image
+                            fallback="/dummy-image.jpg"
                             className="h-10 w-10 rounded-full object-contain mix-blend-multiply shadow-lg"
                             src={`${process.env.ADMINURL}/upload/vendorImage/${record.vendor_image}`}
                             alt="vendor_image"
@@ -323,9 +324,9 @@ const AllVendors = () => {
                 body: requestBody,
             });
 
-            if(res.status === 400){
+            if (res.status === 400) {
                 showMessage('Email already exists', 'error');
-                return
+                return;
             }
             if (!res.ok) {
                 throw new Error(`Failed to ${selectedKey ? 'update' : 'add'} vendor`);

@@ -41,7 +41,6 @@ const VendorSidebar = () => {
     const { t } = getTranslation();
     const pathname = usePathname();
     const [currentMenu, setCurrentMenu] = useState<string>('');
-    const [errorSubMenu, setErrorSubMenu] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
 
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
@@ -54,8 +53,6 @@ const VendorSidebar = () => {
             return oldValue === value ? '' : value;
         });
     };
-
-    console.log(pathname);
 
     useEffect(() => {
         setCurrentMenu(pathname);
@@ -143,19 +140,23 @@ const VendorSidebar = () => {
 
                                     <AnimateHeight duration={300} height={currentMenu.startsWith(`/vendor/${item.store_slug}`) ? 'auto' : 0}>
                                         <ul className="sub-menu text-gray-500">
-                                            <li className={currentMenu === `/vendor/${item.store_slug}` && 'text-blue-800'}>
+                                            <li className={currentMenu === `/vendor/${item.store_slug}` ? 'text-blue-800' : ''}>
                                                 <Link href={`/vendor/${item.store_slug}`}>{`Dashboard`}</Link>
                                             </li>
 
-                                            <li className={currentMenu === `/vendor/${item.store_slug}/managecustomer` && 'text-blue-800'}>
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/managecustomer` ? 'text-blue-800' : ''}>
                                                 <Link href={`/vendor/${item.store_slug}/managecustomer`}>{`Manage Customer`}</Link>
                                             </li>
 
-                                            <li className={currentMenu === `/vendor/${item.store_slug}/api` && 'text-blue-800'}>
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/managecategory` ? 'text-blue-800' : ''}>
+                                                <Link href={`/vendor/${item.store_slug}/managecategory`}>{`Manage Category`}</Link>
+                                            </li>
+
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/api` ? 'text-blue-800' : ''}>
                                                 <Link href={`/vendor/${item.store_slug}/api`}>{`Api Key`}</Link>
                                             </li>
 
-                                            <li className={currentMenu === `/vendor/${item.store_slug}/docs` && 'text-blue-800'}>
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/docs` ? 'text-blue-800' : ''}>
                                                 <Link href={`/vendor/${item.store_slug}/docs`}>{`Documentation`}</Link>
                                             </li>
                                         </ul>
