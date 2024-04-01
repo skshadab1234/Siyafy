@@ -7,7 +7,8 @@ const authenticate = require("../lib");
 const multer = require("multer");
 const sendEmail = require("./nodemailer");
 const fs = require("fs");
-const slugify = require('slugify');
+const slugify = require("slugify");
+const { updateStoreName } = require("../lib/reuse");
 
 app.use(express.json());
 
@@ -438,7 +439,6 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
       status,
     } = JSON.parse(data);
 
-    
     let parsedSelectedRow = {};
     if (selectedRow) {
       try {
@@ -488,6 +488,27 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
         status ? 1 : 0,
         parsedSelectedRow.store_id, // Assuming the unique identifier of the store is 'id'
       ]);
+
+      await updateStoreName(
+        "attributes",
+        parsedSelectedRow?.store_slug,
+        slugify(store_name),
+        parseInt(vendor_id)
+      );
+
+      await updateStoreName(
+        "categories",
+        parsedSelectedRow?.store_slug,
+        slugify(store_name),
+        parseInt(vendor_id)
+      );
+
+      await updateStoreName(
+        "customers",
+        parsedSelectedRow?.store_slug,
+        slugify(store_name),
+        parseInt(vendor_id)
+      );
 
       return res
         .status(200)
@@ -541,6 +562,5 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 module.exports = app;

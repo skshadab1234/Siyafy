@@ -6,7 +6,7 @@ const pool = require("../config");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
-const e = require("express");
+const slugify = require("slugify");
 
 app.use(express.json());
 app.use(cors());
@@ -18,7 +18,7 @@ app.use((req, res, next) => {
 app.get("/getAllProductCatgeory", async (req, res) => {
   try {
     const query =
-      "SELECT categories.*, COUNT(products.category) AS product_count FROM categories LEFT JOIN products ON categories.category_name = products.category GROUP BY categories.category_id";
+      "SELECT categories.* FROM categories  GROUP BY categories.category_id";
 
     const { rows } = await pool.query(query);
     res.status(200).json(rows);
@@ -45,9 +45,8 @@ app.get("/getAllCatgeoryWithSubcategory", async (req, res) => {
 
     if (!search) {
       categoriesQuery = `
-            SELECT categories.*, COUNT(products.category) AS product_count
+            SELECT categories.*
             FROM categories
-            LEFT JOIN products ON categories.category_name = products.category
             WHERE categories.store_name = $1 AND categories.vendor_id = $2
             GROUP BY categories.category_id
             ORDER BY categories.category_id
@@ -58,9 +57,8 @@ app.get("/getAllCatgeoryWithSubcategory", async (req, res) => {
     } else {
       const searchString = `%${search}%`;
       categoriesQuery = `
-            SELECT categories.*, COUNT(products.category) AS product_count
+            SELECT categories.*
             FROM categories
-            LEFT JOIN products ON categories.category_name = products.category
             WHERE (categories.category_name ILIKE $1
             OR EXISTS (
                 SELECT 1
@@ -92,14 +90,13 @@ app.get("/getAllCatgeoryWithSubcategory", async (req, res) => {
     const subcategoriesQuery = `
         SELECT 
             subcategories.*,
-            categories.category_id,
-            COUNT(products.category) AS product_count
+            categories.category_id
+           
         FROM 
             public.subcategories
         LEFT JOIN 
             categories ON subcategories.parent_category_id = categories.category_id
-        LEFT JOIN 
-            products ON subcategories.subcategory_name = products.subcategory 
+     
         GROUP BY 
             subcategories.subcategory_id, categories.category_id, subcategories.subcategory_name, subcategories.subcategory_description, subcategories.subcategory_image_url, subcategories.parent_category_id, subcategories.created_at, subcategories.updated_at, subcategories.isfeatured, subcategories.subcat_status, subcategories.nested_subcategories
         `;
@@ -263,8 +260,8 @@ app.post("/addNewCategories", async (req, res) => {
       subcategories = [],
       attribute_cat_id,
     } = req.body.values;
-    const vendor_id = req.body.vendor_id
-    const store = req.body.store_name
+    const vendor_id = req.body.vendor_id;
+    const store = req.body.store_name;
 
     console.log(vendor_id, store);
     // Check if the category with the same name already exists
@@ -272,7 +269,8 @@ app.post("/addNewCategories", async (req, res) => {
       "SELECT category_name FROM categories WHERE category_name = $1 AND vendor_id = $2 AND store_name = $3";
     const existingCategoryResult = await pool.query(existingCategoryQuery, [
       category_name,
-      vendor_id, store
+      vendor_id,
+      store,
     ]);
 
     if (existingCategoryResult.rows.length > 0) {
@@ -309,8 +307,8 @@ app.post("/addNewCategories", async (req, res) => {
 
     // Insert the main category into the "categories" table
     const insertCategoryQuery = `
-            INSERT INTO categories (category_type, category_name, category_description, category_status, attribute_cat_id, vendor_id, store_name)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO categories (category_type, category_name, category_description, category_status, attribute_cat_id, vendor_id, store_name, cat_slug)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING *;
         `;
 
@@ -321,7 +319,8 @@ app.post("/addNewCategories", async (req, res) => {
       category_status,
       attribute_cat_id,
       vendor_id,
-      store
+      store,
+      slugify(category_name),
     ]);
 
     const categoryId = categoryResult.rows[0].category_id;
@@ -336,9 +335,10 @@ app.post("/addNewCategories", async (req, res) => {
         nested_subcategories,
       } = subcategory;
 
+      console.log(nested_subcategories, "nested_subcategories");
       const insertSubcategoryQuery = `
-                INSERT INTO subcategories (subcategory_name, subcategory_description, parent_category_id, nested_subcategories)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO subcategories (subcategory_name, subcategory_description, parent_category_id, nested_subcategories, subcat_slug)
+                VALUES ($1, $2, $3, $4, $5)
                 RETURNING *;
             `;
       const insertedSubcategoryResult = await pool.query(
@@ -348,6 +348,7 @@ app.post("/addNewCategories", async (req, res) => {
           subcategory_description,
           categoryId,
           nested_subcategories,
+          slugify(subcategory_name),
         ]
       );
 
@@ -410,7 +411,7 @@ app.post("/updateCategory", async (req, res) => {
 
     // If the category exists, proceed with the update
     const updateQuery =
-      "UPDATE categories SET category_name = $1, category_description = $2, category_status = $4, category_type = $5, attribute_cat_id = $6, store_name=$7, vendor_id = $8 WHERE category_id = $3 RETURNING *";
+      "UPDATE categories SET category_name = $1, category_description = $2, category_status = $4, category_type = $5, attribute_cat_id = $6, store_name=$7, vendor_id = $8, cat_slug = $9 WHERE category_id = $3 RETURNING *";
     const updateValues = [
       category_name,
       category_description,
@@ -420,6 +421,7 @@ app.post("/updateCategory", async (req, res) => {
       attribute_cat_id,
       store,
       vendorId,
+      slugify(category_name),
     ];
     const { rows } = await pool.query(updateQuery, updateValues);
 
@@ -434,19 +436,28 @@ app.post("/updateCategory", async (req, res) => {
           nested_subcategories,
         } = subcategory;
 
-        // Convert nestedSubcategories array to JSON
-        const nestedSubcategoriesJSON = JSON.stringify(nested_subcategories);
+        const updatedNestedSubcategories = nested_subcategories.map(
+          (category) => {
+            const nestedSlug = slugify(category.nested_subcategory_name);
+            return { ...category, nested_slug: nestedSlug };
+          }
+        );
 
+        // Convert nestedSubcategories array to JSON
+        const nestedSubcategoriesJSON = JSON.stringify(updatedNestedSubcategories);
+
+        console.log(nestedSubcategoriesJSON, "nested_subcategories");
         if (subcategory_id) {
           // Update existing subcategory
           const subUpdateQuery =
-            "UPDATE subcategories SET subcategory_name = $2, subcat_status = $3, subcategory_description = $4, nested_subcategories = $5 WHERE subcategory_id = $1 RETURNING *";
+            "UPDATE subcategories SET subcategory_name = $2, subcat_status = $3, subcategory_description = $4, nested_subcategories = $5, subcat_slug = $6 WHERE subcategory_id = $1 RETURNING *";
           const subUpdateValues = [
             subcategory_id,
             subcategory_name,
             subcat_status,
             subcategory_description,
             nestedSubcategoriesJSON,
+            slugify(subcategory_name),
           ];
           await pool.query(subUpdateQuery, subUpdateValues);
         } else {
@@ -583,102 +594,5 @@ app.post(
     }
   }
 );
-
-app.post("/vendorCatChange", async (req, res) => {
-  try {
-    let { type, recordId, newValue } = req.body;
-
-    // Assume you have a database connection pool named 'pool'
-    console.log(type);
-    // Check the type and update the corresponding column
-    let updateQuery = "";
-    let updateParams = [];
-    const slug_cat = newValue?.replace(/[^\w\s]/g, "").replace(/\s/g, "");
-
-    if (type === "category") {
-      updateQuery =
-        "UPDATE products SET category = $1, slug_cat = $2, status = 0 WHERE id = $3";
-      updateParams = [newValue, slug_cat, recordId];
-    } else if (type === "subcategory") {
-      updateQuery =
-        "UPDATE products SET subcategory = $1, slug_cat = $2, status = 0 WHERE id = $3";
-      updateParams = [newValue, slug_cat, recordId];
-    } else if (type === "sellingprice") {
-      updateQuery =
-        "UPDATE products SET sellingprice = $1, status = 0 WHERE id = $2";
-      updateParams = [newValue, recordId];
-    } else if (type === "mrp") {
-      updateQuery = "UPDATE products SET mrp = $1, status = 0 WHERE id = $2";
-      updateParams = [newValue, recordId];
-    } else if (type === "brand") {
-      updateQuery = "UPDATE products SET brand = $1, status = 0 WHERE id = $2";
-      updateParams = [newValue, recordId];
-    } else if (type === "quantity") {
-      updateQuery =
-        "UPDATE products SET quantity = $1, status = 0 WHERE id = $2";
-      updateParams = [newValue, recordId];
-    } else if (type === "ad_title") {
-      updateQuery =
-        "UPDATE products SET ad_title = $1, status = 0 WHERE id = $2";
-      updateParams = [newValue, recordId];
-    } else if (type === "skuid") {
-      // Check if the new skuid already exists in the products table
-      const skuidCheckQuery =
-        "SELECT id FROM products WHERE skuid = $1 AND id != $2";
-      const skuidCheckParams = [newValue, recordId];
-      const skuidCheckResult = await pool.query(
-        skuidCheckQuery,
-        skuidCheckParams
-      );
-
-      if (skuidCheckResult.rows.length > 0) {
-        // Skuid already exists in the products table, return an error
-        return res.status(400).json({
-          message:
-            "Skuid already exists in products. Please choose a different one.",
-        });
-      }
-
-      // Check if the new skuid already exists in the variantproducts table
-      const variantSkuidCheckQuery =
-        "SELECT variant_id FROM variantproducts WHERE variant_skuid = $1 AND product_uniqueid != $2";
-      const variantSkuidCheckParams = [
-        newValue,
-        skuidCheckResult?.rows?.[0]?.product_uniquepid,
-      ];
-      const variantSkuidCheckResult = await pool.query(
-        variantSkuidCheckQuery,
-        variantSkuidCheckParams
-      );
-
-      if (variantSkuidCheckResult.rows.length > 0) {
-        // Skuid already exists in variantproducts, return an error
-        return res.status(400).json({
-          message:
-            "Skuid already exists in variantproducts. Please choose a different one.",
-        });
-      }
-
-      // Continue with the update if skuid is unique in both tables
-      updateQuery = "UPDATE products SET skuid = $1, status = 0 WHERE id = $2";
-      updateParams = [
-        newValue,
-        variantSkuidCheckResult?.rows?.[0]?.product_uniquepid,
-      ];
-    } else {
-      return res.status(400).json({ message: "Invalid type provided." });
-    }
-
-    console.log(updateQuery, updateParams);
-
-    // Execute the update query
-    await pool.query(updateQuery, updateParams);
-
-    res.status(200).json({ message: "Category updated successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error occurred" });
-  }
-});
 
 module.exports = app;

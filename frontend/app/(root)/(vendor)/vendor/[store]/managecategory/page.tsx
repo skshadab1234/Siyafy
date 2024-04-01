@@ -128,7 +128,7 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
             render: (_, record) => (
                 <>
                     <p>
-                        {record?.category_name} ({record?.product_count})
+                        {record?.category_name}
                     </p>
                 </>
             ),

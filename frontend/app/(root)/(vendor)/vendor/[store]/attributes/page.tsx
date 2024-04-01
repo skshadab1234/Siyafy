@@ -38,9 +38,8 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
             checkStoreExists(vendorData.id, params.store).then((storeExists) => {
                 if (!storeExists?.success) {
                     router.push('/vendor');
-                    
                 }
-                fetchDataAttributes()
+                fetchDataAttributes();
             });
         }
     }, [vendorData, params]);
@@ -92,7 +91,7 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
                         backendCategory,
                         backendSubCategory,
                         store_name: params.store,
-                        vendor_id: vendorData?.id
+                        vendor_id: vendorData?.id,
                     };
 
                     const response = await fetch(`${process.env.ADMINURL}/api/SetAttributesValues`, {
@@ -420,7 +419,11 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
             // Your API call to fetch categories data
             const response = await fetch(`${process.env.ADMINURL}/api/getAllProductCatgeory`);
             const data = await response.json();
-            setCategories(data);
+            console.log(data, 'data');
+
+            const filteredData = data.filter(item => item?.store_name === params?.store);
+
+            setCategories(filteredData);
         } catch (err) {
             console.log(err);
         }
@@ -457,7 +460,6 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
         }
     };
 
-    console.log(selectedCategory, 'selecaetgry');
 
     const handleSubcategoryChange = (selectedSubcategories) => {
         console.log('Selected Subcategories:', selectedSubcategories);
@@ -477,7 +479,7 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
             categoryFunction();
             subcategoryFunction();
         }
-    }, [categories, subcategories]);
+    }, []);
 
     // // useEffect to filter subcategories based on the selected category ID
     // useEffect(() => {
@@ -500,7 +502,6 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
         <div>
             <div className="items-center  justify-between space-y-5 py-3 md:flex">
                 <h1 className="text-4xl font-bold text-gray-700">Manage Attributes</h1>
-                
             </div>
             <button onClick={showModal} className="absolute right-10 top-24 rounded-full bg-[#EC642A]  p-2 text-white hover:bg-[#EC642A]/80">
                 <svg className="h-10 w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -531,13 +532,14 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
                             onChange={(category) => handleCategoryChange(category)}
                             value={selectedCategory || undefined}
                         >
-                            {categories
-                                .filter((category) => category.category_type === selectedCategoryType)
-                                .map((category) => (
-                                    <Select.Option key={category.category_id} value={category.category_name} category={category}>
-                                        {category.category_name}
-                                    </Select.Option>
-                                ))}
+                            {categories &&
+                                categories
+                                    .filter((category) => category.category_type === selectedCategoryType)
+                                    .map((category) => (
+                                        <Select.Option key={category.category_id} value={category.category_name} category={category}>
+                                            {category.category_name}
+                                        </Select.Option>
+                                    ))}
                         </Select>
                     </div>
 
@@ -553,11 +555,12 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
                             allowClear // Add this prop to enable clearing the selected value
                             showSearch
                         >
-                            {filteredSubcategories.map((subcategory) => (
-                                <Select.Option key={subcategory.subcategory_id} value={subcategory.subcategory_name}>
-                                    {subcategory.subcategory_name}
-                                </Select.Option>
-                            ))}
+                            {filteredSubcategories &&
+                                filteredSubcategories.map((subcategory) => (
+                                    <Select.Option key={subcategory.subcategory_id} value={subcategory.subcategory_name}>
+                                        {subcategory.subcategory_name}
+                                    </Select.Option>
+                                ))}
                         </Select>
                     </div>
                 </div>

@@ -7,33 +7,10 @@ import AnimateHeight from 'react-animate-height';
 import { IRootState } from '@/store';
 import { useState, useEffect } from 'react';
 import IconCaretsDown from '@/components/icon/icon-carets-down';
-import IconMenuDashboard from '@/components/icon/menu/icon-menu-dashboard';
 import IconCaretDown from '@/components/icon/icon-caret-down';
 import IconMinus from '@/components/icon/icon-minus';
-import IconMenuChat from '@/components/icon/menu/icon-menu-chat';
-import IconMenuMailbox from '@/components/icon/menu/icon-menu-mailbox';
-import IconMenuTodo from '@/components/icon/menu/icon-menu-todo';
-import IconMenuNotes from '@/components/icon/menu/icon-menu-notes';
-import IconMenuScrumboard from '@/components/icon/menu/icon-menu-scrumboard';
-import IconMenuContacts from '@/components/icon/menu/icon-menu-contacts';
-import IconMenuInvoice from '@/components/icon/menu/icon-menu-invoice';
-import IconMenuCalendar from '@/components/icon/menu/icon-menu-calendar';
-import IconMenuComponents from '@/components/icon/menu/icon-menu-components';
-import IconMenuElements from '@/components/icon/menu/icon-menu-elements';
-import IconMenuCharts from '@/components/icon/menu/icon-menu-charts';
-import IconMenuWidgets from '@/components/icon/menu/icon-menu-widgets';
-import IconMenuFontIcons from '@/components/icon/menu/icon-menu-font-icons';
-import IconMenuDragAndDrop from '@/components/icon/menu/icon-menu-drag-and-drop';
-import IconMenuTables from '@/components/icon/menu/icon-menu-tables';
-import IconMenuDatatables from '@/components/icon/menu/icon-menu-datatables';
-import IconMenuForms from '@/components/icon/menu/icon-menu-forms';
-import IconMenuUsers from '@/components/icon/menu/icon-menu-users';
-import IconMenuPages from '@/components/icon/menu/icon-menu-pages';
-import IconMenuAuthentication from '@/components/icon/menu/icon-menu-authentication';
-import IconMenuDocumentation from '@/components/icon/menu/icon-menu-documentation';
 import { usePathname } from 'next/navigation';
 import { getTranslation } from '@/i18n';
-import IconUserPlus from '../icon/icon-user-plus';
 import { Store } from 'lucide-react';
 
 const VendorSidebar = () => {
@@ -154,6 +131,10 @@ const VendorSidebar = () => {
 
                                             <li className={currentMenu === `/vendor/${item.store_slug}/managecategory` ? 'text-blue-800' : ''}>
                                                 <Link href={`/vendor/${item.store_slug}/managecategory`}>{`Manage Category`}</Link>
+                                            </li>
+
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/products/all` ? 'text-blue-800' : ''}>
+                                                <Link href={`/vendor/${item.store_slug}/products/all`}>{`Manage Products`}</Link>
                                             </li>
 
                                             <li className={currentMenu === `/vendor/${item.store_slug}/api` ? 'text-blue-800' : ''}>

@@ -18,13 +18,15 @@ const authenticate = (req, res, next) => {
   const data = jwt.verify(token, process.env.SECRET_KEY);
 
   const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-  
+
   if (data.exp < currentTime) {
-    req.userId = null
+    req.userId = null;
   }
 
   req.userId = data.id;
   next();
 };
+
+
 
 module.exports = authenticate;

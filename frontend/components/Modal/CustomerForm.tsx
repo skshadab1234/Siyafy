@@ -28,17 +28,17 @@ const CustomerForm = ({
     const countryList = Country.getAllCountries();
 
     useEffect(() => {
-        setSelectedCountry(selectedCountrydata)
-        const states = State.getStatesOfCountry(selectedCountrydata?.isoCode) || []
-        setStates(states)
+        setSelectedCountry(selectedCountrydata);
+        const states = State.getStatesOfCountry(selectedCountrydata?.isoCode) || [];
+        setStates(states);
         console.log(states?.[0]?.countryCode, selectedCountrydata);
-        
+
         const cities = City.getCitiesOfState(states?.[0]?.countryCode, selectedCountrydata?.name);
         console.log(cities);
-        
+
         setCity(cities);
-    }, [selectedCountrydata])
-    
+    }, [selectedCountrydata]);
+
     const handleChangeCountry = (value, option) => {
         const selectedCountry = option?.data; // Access the data property of the selected option
         setSelectedCountry(selectedCountry);
@@ -132,7 +132,7 @@ const CustomerForm = ({
                             className="h-12"
                             style={{ width: '100%' }}
                         >
-                            <Select showSearch allowClear onChange={handleChangeCountry}>
+                            <Select showSearch className="h-12" allowClear onChange={handleChangeCountry}>
                                 {countryList.map((country, index) => (
                                     <Option key={index} value={country.name} data={country}>
                                         {country.name}

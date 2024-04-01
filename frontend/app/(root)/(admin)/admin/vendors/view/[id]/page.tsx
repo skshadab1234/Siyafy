@@ -74,8 +74,6 @@ const ViewVendor = () => {
     };
 
     const handleSubmit = (value: any) => {
-        console.log(value, 'valle');
-
         const formData = new FormData();
         formData.append('vendor_id', id);
         formData.append('data', JSON.stringify(value));

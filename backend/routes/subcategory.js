@@ -6,6 +6,7 @@ const pool = require("../config");
 const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
+const { default: slugify } = require("slugify");
 
 app.use(express.json());
 app.use(cors());
@@ -18,7 +19,7 @@ app.get("/getAllSubcategories", async (req, res) => {
   try {
     // const query = "SELECT * FROM subcategories";
     const query =
-      "SELECT subcategories.*, COUNT(products.subcategory) AS product_subcount FROM subcategories LEFT JOIN products ON subcategories.subcategory_name = products.subcategory GROUP BY subcategories.subcategory_id, subcategories.subcategory_name, subcategories.subcategory_description, subcategories.subcategory_image_url, subcategories.parent_category_id, subcategories.created_at,subcategories.updated_at, subcategories.isfeatured,subcategories.subcat_status, subcategories.nested_subcategories";
+      "SELECT subcategories.* FROM subcategories GROUP BY subcategories.subcategory_id, subcategories.subcategory_name, subcategories.subcategory_description, subcategories.subcategory_image_url, subcategories.parent_category_id, subcategories.created_at,subcategories.updated_at, subcategories.isfeatured,subcategories.subcat_status, subcategories.nested_subcategories";
 
     const { rows } = await pool.query(query);
     res.status(200).json(rows);
@@ -188,19 +189,15 @@ app.post(
 
       await pool.query(updateQuery, values);
 
-      res
-        .status(200)
-        .json({
-          file: file.filename,
-          message: "SubCategory image updated successfully.",
-        });
+      res.status(200).json({
+        file: file.filename,
+        message: "SubCategory image updated successfully.",
+      });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          message: "Error occurred while storing the category picture.",
-        });
+      res.status(500).json({
+        message: "Error occurred while storing the category picture.",
+      });
     }
   }
 );
@@ -244,6 +241,7 @@ app.post(
       const subcatData = JSON.parse(SubMainSelectedRow);
       const { nested_subcategories } = subcatData;
 
+      console.log(nested_subcategories);
       // Update nested_subcat_status for the matched nested subcategory
       const update =
         nested_subcategories &&
@@ -253,6 +251,9 @@ app.post(
             return {
               ...item,
               image_url: file.filename, // Replace 'newStatus' with the desired status value
+              nested_slug: slugify(
+                nested_subcategories[index]?.nested_subcategory_name
+              ),
             };
           }
           return item;
@@ -267,20 +268,16 @@ app.post(
 
       const { rows } = await pool.query(updateQuery, values);
 
-      res
-        .status(200)
-        .json({
-          file: file.filename,
-          message: "SubCategory image updated successfully.",
-          file: file.filename,
-        });
+      res.status(200).json({
+        file: file.filename,
+        message: "SubCategory image updated successfully.",
+        file: file.filename,
+      });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          message: "Error occurred while storing the category picture.",
-        });
+      res.status(500).json({
+        message: "Error occurred while storing the category picture.",
+      });
     }
   }
 );
