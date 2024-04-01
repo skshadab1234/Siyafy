@@ -226,7 +226,7 @@ const Managecustomer = ({ params }: { params: { store: string } }) => {
                             width={40}
                             height={40}
                             fallback='/dummy-image.jpg'
-                            src={record.customer_media ? `${process.env.ADMINURL}/upload/customerProfile/${record.customer_media}` : '/dummy-image.jpg'}
+                            src={record?.customer_media ? `${process.env.ADMINURL}/upload/customerProfile/${record.customer_media}` : '/dummy-image.jpg'}
                             style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
                             alt="Customer"
                         />

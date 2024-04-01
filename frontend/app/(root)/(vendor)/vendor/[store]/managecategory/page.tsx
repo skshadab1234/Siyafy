@@ -376,7 +376,7 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
                     );
                 } else {
                     return (
-                        <FaEdit
+                        <Edit2
                             className="cursor-pointer text-gray-500"
                             onClick={() => {
                                 setSelectedNestedCategory(row?.nested_subcategory_name);
@@ -624,7 +624,7 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
                         console.error('Network error:', error);
                     });
             } else if (type === 'submaincategory') {
-                fetch(`${process.env.ADMINURL}/api/UploadubMaincatgeoryImage`, {
+                fetch(`${process.env.ADMINURL}/api/UploadSubMaincatgeoryImage`, {
                     method: 'POST',
                     body: formData,
                 })
@@ -698,7 +698,7 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(values),
+                        body: JSON.stringify({values, store_name: params.store, vendor_id: vendorData?.id}),
                     });
 
                     if (response.ok) {
@@ -724,7 +724,7 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
                         Swal.fire({
                             icon: 'success',
                             title: 'Success',
-                            text: result.message,
+                            text: result?.message,
                         });
                         setModalVisible(false);
                     } else {
@@ -964,6 +964,7 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
         const query = e.target.value;
         fetchData(query);
     };
+    
     return (
         <div className="mb-44 p-4 sm:p-0 ">
             <div className="items-center  justify-between space-y-5 py-10 md:flex">

@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const authenticate = require("../lib");
 const multer = require("multer");
 const fs = require("fs");
+const sendEmail = require("./nodemailer");
 
 app.use(express.json());
 
@@ -63,6 +64,12 @@ async function insertCustomer(
     selectedCountry,
   } = customerData;
 
+  // Generate a random password
+  const generatedPassword = Math.random().toString(36).slice(-8); // Generates an 8 character random password
+
+  // Hash the password
+  const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
   // Check if the email already exists for the given vendor and store
   const emailExistsQuery = `
       SELECT EXISTS (
@@ -85,15 +92,16 @@ async function insertCustomer(
   // Inserting customer data into the database
   const insertQuery = `
       INSERT INTO customers (
-        first_name, last_name, email, phone, address_country,
+        first_name, last_name, email, password, phone, address_country,
         address_company, address_line1, address_line2, city, state,
         pin_code, phone_number_address, note, collect_taxes, customer_media, vendor_id, store_name, countryJSONB
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) RETURNING *
     `;
   const { rows: InsertRow } = await pool.query(insertQuery, [
     first_name,
     last_name,
     email,
+    hashedPassword, // Using hashed password instead of plain password
     phone,
     address_country,
     company,
@@ -111,7 +119,7 @@ async function insertCustomer(
     selectedCountry,
   ]);
 
-  return InsertRow;
+  return { ...InsertRow[0], password: generatedPassword }; // Return the generated password along with other inserted data
 }
 
 app.post(
@@ -124,12 +132,27 @@ app.post(
       const { data, store_name } = req.body;
       const customerData = JSON.parse(data);
 
-      const InsertRow = await insertCustomer(
+      const {InsertRow, password} = await insertCustomer(
         customerData,
         customer_media,
         req.userId,
         store_name
+
       );
+
+      const emailTemplate = `
+      <p>Dear User,</p>
+      <p>Your account has been successfully created. Here are your account details:</p>
+      <ul>
+        <li><strong>Email:</strong> ${customerData?.email}</li>
+        <li><strong>Password:</strong> ${password}</li>
+      </ul>
+      <p>Wishing you a great shopping experience!</p>
+      <p>Best Regards,</p>
+      <p>Siyahfy</p>
+    `;
+
+      await sendEmail(customerData?.email, 'Account Created Successfully', emailTemplate)
 
       res.status(200).json({
         success: true,

@@ -21,14 +21,17 @@ app.post("/SetAttributesValues", async (req, res) => {
       subcategory,
       backendCategory,
       backendSubCategory,
+      store_name,
+      vendor_id,
     } = req.body;
 
+    console.log(req.body);
     let attributeId;
     if (type === "update") {
       // Update existing attribute
       const updateQuery = `
                 UPDATE attributes
-                SET attribute_values = $1, category = $2, subcategory = $3
+                SET attribute_values = $1, category = $2, subcategory = $3, vendor_id = $5, store_name=$6
                 WHERE attribute_name = $4
                 RETURNING attribute_id;
             `;
@@ -37,6 +40,8 @@ app.post("/SetAttributesValues", async (req, res) => {
         JSON.stringify(category),
         JSON.stringify(subcategory),
         attributeName,
+        vendor_id,
+        store_name,
       ]);
 
       if (updatedRows.length > 0) {
@@ -49,19 +54,21 @@ app.post("/SetAttributesValues", async (req, res) => {
       const checkQuery = `
                 SELECT COUNT(*) AS count
                 FROM attributes
-                WHERE attribute_name = $1 AND category = $2 AND subcategory = $3;
+                WHERE attribute_name = $1 AND category = $2 AND subcategory = $3 AND vendor_id = $4 AND store_name = $5;
             `;
       const { rows } = await pool.query(checkQuery, [
         attributeName,
         JSON.stringify(category),
         JSON.stringify(subcategory),
+        vendor_id,
+        store_name,
       ]);
       const existingAttributeCount = parseInt(rows[0].count, 10);
 
       if (existingAttributeCount === 0) {
         const insertQuery = `
-                    INSERT INTO attributes (attribute_name, attribute_values, category, subcategory)
-                    VALUES ($1, $2, $3, $4)
+                    INSERT INTO attributes (attribute_name, attribute_values, category, subcategory, vendor_id, store_name)
+                    VALUES ($1, $2, $3, $4, $5, $6)
                     RETURNING attribute_id;
                 `;
         const { rows: attributeRows } = await pool.query(insertQuery, [
@@ -69,15 +76,15 @@ app.post("/SetAttributesValues", async (req, res) => {
           attributeValues,
           JSON.stringify(category),
           JSON.stringify(subcategory),
+          vendor_id,
+          store_name,
         ]);
         attributeId = attributeRows?.[0]?.attribute_id;
       } else {
-        return res
-          .status(400)
-          .json({
-            error:
-              "Attribute with the same name, category, and subcategory already exists",
-          });
+        return res.status(400).json({
+          error:
+            "Attribute with the same name, category, and subcategory already exists",
+        });
       }
     }
 
@@ -138,14 +145,15 @@ app.post("/SetAttributesValues", async (req, res) => {
 
 app.post("/GetAttributesByVendor", async (req, res) => {
   try {
+    const { store_name = "", vendor_id = 0 } = req.query;
     // Example SQL query to retrieve attributes by vendor_id
     const query = `
             SELECT *
-            FROM attributes ORDER BY attribute_id ASC
+            FROM attributes WHERE vendor_id = $1 AND store_name = $2 ORDER BY attribute_id ASC
         `;
 
     // Execute the query
-    const { rows } = await req.pool.query(query);
+    const { rows } = await req.pool.query(query, [vendor_id, store_name]);
 
     // Assuming the data is retrieved successfully, send it as a JSON response
     res.status(200).json({ attributes: rows });

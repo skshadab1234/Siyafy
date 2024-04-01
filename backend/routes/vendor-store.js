@@ -24,9 +24,13 @@ app.post("/vendorLogin", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Email ko lower case mein convert karein
+    const lowerCaseEmail = email.toLowerCase();
+
+    // Query ko execute karte waqt lower case email ka istemal karein
     const result = await req.pool.query(
-      "SELECT * FROM vendors_registration WHERE email = $1",
-      [email]
+      "SELECT * FROM vendors_registration WHERE email ILIKE $1",
+      [lowerCaseEmail]
     );
 
     if (result.rows.length > 0) {
@@ -245,7 +249,7 @@ app.post("/Vendor/getApi", authenticate, async (req, res) => {
     const query = `
       SELECT api_key
       FROM stores
-      WHERE store_slug = $1 AND vendor_id = $2` ;
+      WHERE store_slug = $1 AND vendor_id = $2`;
 
     const { rows } = await pool.query(query, [store_name, req.userId]);
 

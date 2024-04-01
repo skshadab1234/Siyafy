@@ -148,6 +148,10 @@ const VendorSidebar = () => {
                                                 <Link href={`/vendor/${item.store_slug}/managecustomer`}>{`Manage Customer`}</Link>
                                             </li>
 
+                                            <li className={currentMenu === `/vendor/${item.store_slug}/attributes` ? 'text-blue-800' : ''}>
+                                                <Link href={`/vendor/${item.store_slug}/attributes`}>{`Manage Attributes`}</Link>
+                                            </li>
+
                                             <li className={currentMenu === `/vendor/${item.store_slug}/managecategory` ? 'text-blue-800' : ''}>
                                                 <Link href={`/vendor/${item.store_slug}/managecategory`}>{`Manage Category`}</Link>
                                             </li>

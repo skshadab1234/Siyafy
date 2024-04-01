@@ -1,8 +1,13 @@
+'use client';
 import React, { useEffect, useState } from 'react';
 import { Table, Input, Button, Space, Modal, Form, Select } from 'antd';
 import Swal from 'sweetalert2';
+import { useSelector } from 'react-redux';
+import { IRootState } from '@/store';
+import { useRouter } from 'next/navigation';
+import { checkStoreExists } from '@/components/utils/checkStoreExists';
 
-const VendorAttributes = () => {
+const VendorAttributes = ({ params }: { params: { store: string } }) => {
     const [attributeName, setAttributeName] = useState('');
     const [attributeValue, setAttributeValue] = useState('');
     const [attributes, setAttributes] = useState([]);
@@ -21,13 +26,27 @@ const VendorAttributes = () => {
     const [backendCategory, setBackendCategory] = useState(null);
     const [backendSubCategory, setBackendSubCategory] = useState(null);
 
+    const vendorData = useSelector((state: IRootState) => state.vendor);
     const showModal = () => {
         setVisible(true);
     };
 
-    const fetchData = async () => {
+    const router = useRouter();
+
+    useEffect(() => {
+        if (vendorData?.id && params.store) {
+            checkStoreExists(vendorData.id, params.store).then((storeExists) => {
+                if (!storeExists?.success) {
+                    router.push('/vendor');
+                    
+                }
+                fetchDataAttributes()
+            });
+        }
+    }, [vendorData, params]);
+    const fetchDataAttributes = async () => {
         try {
-            const response = await fetch(`${process.env.ADMINURL}/api/GetAttributesByVendor`, {
+            const response = await fetch(`${process.env.ADMINURL}/api/GetAttributesByVendor?store_name=${params.store}&vendor_id=${vendorData?.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -57,11 +76,6 @@ const VendorAttributes = () => {
         }
     };
 
-    useEffect(() => {
-        // Fetch data when the component mounts
-        fetchData();
-    }, []);
-
     const handleOk = async () => {
         if (!selectedCategory) return alert('Kindly select category');
         if (!selectedSubcategory) return alert('Kindly select subcategory');
@@ -77,6 +91,8 @@ const VendorAttributes = () => {
                         subcategory: selectedSubcategory,
                         backendCategory,
                         backendSubCategory,
+                        store_name: params.store,
+                        vendor_id: vendorData?.id
                     };
 
                     const response = await fetch(`${process.env.ADMINURL}/api/SetAttributesValues`, {
@@ -165,7 +181,7 @@ const VendorAttributes = () => {
             setSelectedAttributeIndex(null);
             setVisible(false);
             setEditModalVisible(false);
-            fetchData();
+            fetchDataAttributes();
         } else {
             Swal.fire({
                 icon: 'info',
@@ -245,57 +261,107 @@ const VendorAttributes = () => {
 
     const columns = [
         {
-            title: 'Catgeory',
+            title: 'Category',
             dataIndex: 'category',
             key: 'category',
             width: 150,
+            render: (category) => {
+                // Parse the category if it's a string; otherwise, use it directly.
+                let categories = [];
+                try {
+                    categories = typeof category === 'string' ? JSON.parse(category) : category;
+                } catch (e) {
+                    console.error('Error parsing category:', e);
+                    // If there's an error parsing, assume it's a single category object
+                    categories = [category];
+                }
+
+                // Ensure categories is an array for mapping
+                if (!Array.isArray(categories)) {
+                    categories = [categories];
+                }
+
+                return (
+                    <div>
+                        {/* Map over categories to display each name. */}
+                        {categories.map((cat, index) => (
+                            <div key={index}>
+                                <span>{cat}</span>
+                                {index < categories.length - 1 ? ', ' : ''}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
         },
         {
-            title: 'Subcatgeory',
+            title: 'Subcategory',
             dataIndex: 'subcategory',
             key: 'subcategory',
             width: 150,
+            render: (subcategory) => {
+                // Parse the subcategory if it's a string; otherwise, use it directly.
+                let subcategories = [];
+                try {
+                    subcategories = typeof subcategory === 'string' ? JSON.parse(subcategory) : subcategory;
+                } catch (e) {
+                    console.error('Error parsing subcategory:', e);
+                    // If there's an error parsing, assume it's a single subcategory object
+                    subcategories = [subcategory];
+                }
+
+                // Ensure subcategories is an array for mapping
+                if (!Array.isArray(subcategories)) {
+                    subcategories = [subcategories];
+                }
+
+                return (
+                    <div>
+                        {/* Map over subcategories to display each name. */}
+                        {subcategories.map((subcat, index) => (
+                            <div key={index} style={{ marginBottom: '4px' }}>
+                                <span>{subcat}</span>
+                                {index < subcategories.length - 1 ? ', ' : ''}
+                            </div>
+                        ))}
+                    </div>
+                );
+            },
         },
-        {
-            title: 'Attribute Name',
-            dataIndex: 'name',
-            key: 'name',
-            width: 150,
-        },
+
         {
             title: 'Attribute Values',
             dataIndex: 'values',
             key: 'values',
-            render: (values) => (
-                <div className="">
-                    {values?.slice(0, 5).map((value, valueIndex) => (
-                        <span key={valueIndex}>
-                            {value}
-                            {valueIndex !== values?.slice(0, 5).length - 1 && ', '}
-                        </span>
-                    ))}
-
-                    {values && values.length > 5 && (
-                        <span className="ml-2 cursor-pointer text-blue-500" onClick={() => handleReadMore(values)}>
-                            Read more...
-                        </span>
-                    )}
-                </div>
-            ),
+            render: (text) => {
+                // Assuming `values` is a JSON string array. If it's already an array, you can skip JSON.parse.
+                const values = typeof text === 'string' ? JSON.parse(text) : text;
+                return (
+                    <div>
+                        {values?.slice(0, 5).map((value, index) => (
+                            <span key={index} style={{ marginRight: '5px' }}>
+                                {value}
+                                {index !== values.slice(0, 5).length - 1 ? ', ' : ''}
+                            </span>
+                        ))}
+                        {values && values.length > 5 && (
+                            <button style={{ marginLeft: '10px', color: 'blue', cursor: 'pointer', border: 'none', background: 'none' }} onClick={() => handleReadMore(values)}>
+                                Read more...
+                            </button>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             title: 'Action',
             key: 'action',
             width: 250,
             render: (text, record, index) => (
-                <Space size="middle">
-                    <Button type="default" onClick={() => handleEditAttribute(index)}>
-                        Edit
-                    </Button>
-                    <Button type="danger" onClick={() => handleDeleteAttribute(index, record.attribute_id)}>
-                        Delete
-                    </Button>
-                </Space>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => handleEditAttribute(index)}>Edit</button>
+                    <button onClick={() => handleDeleteAttribute(index, record.attribute_id)}>Delete</button>
+                </div>
             ),
         },
     ];
@@ -431,7 +497,11 @@ const VendorAttributes = () => {
     // }, [selectedCategoryId, categories, subcategories]);
 
     return (
-        <div className="sm:ml-72">
+        <div>
+            <div className="items-center  justify-between space-y-5 py-3 md:flex">
+                <h1 className="text-4xl font-bold text-gray-700">Manage Attributes</h1>
+                
+            </div>
             <button onClick={showModal} className="absolute right-10 top-24 rounded-full bg-[#EC642A]  p-2 text-white hover:bg-[#EC642A]/80">
                 <svg className="h-10 w-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

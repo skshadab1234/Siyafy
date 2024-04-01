@@ -259,15 +259,20 @@ app.post("/addNewCategories", async (req, res) => {
       category_type,
       category_name,
       category_description,
-      category_status,
+      category_status = false,
       subcategories = [],
       attribute_cat_id,
-    } = req.body;
+    } = req.body.values;
+    const vendor_id = req.body.vendor_id
+    const store = req.body.store_name
+
+    console.log(vendor_id, store);
     // Check if the category with the same name already exists
     const existingCategoryQuery =
-      "SELECT category_name FROM categories WHERE category_name = $1";
+      "SELECT category_name FROM categories WHERE category_name = $1 AND vendor_id = $2 AND store_name = $3";
     const existingCategoryResult = await pool.query(existingCategoryQuery, [
       category_name,
+      vendor_id, store
     ]);
 
     if (existingCategoryResult.rows.length > 0) {
@@ -304,8 +309,8 @@ app.post("/addNewCategories", async (req, res) => {
 
     // Insert the main category into the "categories" table
     const insertCategoryQuery = `
-            INSERT INTO categories (category_type, category_name, category_description, category_status, attribute_cat_id)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO categories (category_type, category_name, category_description, category_status, attribute_cat_id, vendor_id, store_name)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *;
         `;
 
@@ -315,6 +320,8 @@ app.post("/addNewCategories", async (req, res) => {
       category_description,
       category_status,
       attribute_cat_id,
+      vendor_id,
+      store
     ]);
 
     const categoryId = categoryResult.rows[0].category_id;
