@@ -1,25 +1,11 @@
 'use client';
 import PerfectScrollbar from 'react-perfect-scrollbar';
-import Dropdown from '@/components/dropdown';
-import IconEye from '@/components/icon/icon-eye';
-import IconHorizontalDots from '@/components/icon/icon-horizontal-dots';
 import IconMenu from '@/components/icon/icon-menu';
-import IconNotes from '@/components/icon/icon-notes';
 import IconNotesEdit from '@/components/icon/icon-notes-edit';
-import IconPencil from '@/components/icon/icon-pencil';
 import IconPlus from '@/components/icon/icon-plus';
-import IconSquareRotated from '@/components/icon/icon-square-rotated';
-import IconStar from '@/components/icon/icon-star';
-import IconTrashLines from '@/components/icon/icon-trash-lines';
-import IconUser from '@/components/icon/icon-user';
-import IconX from '@/components/icon/icon-x';
-import { IRootState } from '@/store';
-import { Transition, Dialog } from '@headlessui/react';
-import React, { Fragment, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import Swal from 'sweetalert2';
+import React, { useState } from 'react';
 import { Group, ListChecksIcon } from 'lucide-react';
-import { Drawer, Input, Modal } from 'antd';
+import { Drawer, Input } from 'antd';
 import AppProductsComponent from './AppProductsComponent';
 
 const AppProducts = () => {
