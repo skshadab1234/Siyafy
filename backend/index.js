@@ -12,6 +12,7 @@ const customer = require("./routes/customer");
 const category = require("./routes/category");
 const attributes = require("./routes/attributes");
 const subcategory = require("./routes/subcategory");
+const products = require("./routes/products");
 
 app.use(express.json()); // Middleware para parsear el body
 app.use(cors());
@@ -27,6 +28,7 @@ app.use("/api", customer);
 app.use("/api", category);
 app.use("/api", attributes);
 app.use("/api", subcategory);
+app.use("/api", products);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

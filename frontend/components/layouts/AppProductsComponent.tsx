@@ -4,6 +4,7 @@ import { Button, Dropdown, Form, MenuProps, message, Space, Steps, theme } from 
 import ProductInfo from '../ProductUploading/ProductInfo';
 import ManageStock from '../ProductUploading/ManageStock';
 import LinkedProducts from '../ProductUploading/LinkedProducts';
+import ProductSetting from '../ProductUploading/ProductSetting';
 
 const AppProductsComponent = () => {
     const [form] = Form.useForm();
@@ -21,6 +22,11 @@ const AppProductsComponent = () => {
 
     const [current, setCurrent] = useState(0);
 
+    const handleSetLinked = (objSelcted: any) => {
+        form.setFieldsValue(objSelcted);
+        setFormValues({ ...formValues, ...objSelcted });
+    };
+
     const steps = [
         {
             title: 'Product Information',
@@ -32,11 +38,11 @@ const AppProductsComponent = () => {
         },
         {
             title: 'Link Products',
-            content: <LinkedProducts form={form} />,
+            content: <LinkedProducts form={form} onReturn={handleSetLinked} />,
         },
         {
             title: 'Setting',
-            content: <h1>HEllo</h1>,
+            content: <ProductSetting form={form} />,
         },
     ];
 
@@ -53,7 +59,23 @@ const AppProductsComponent = () => {
     }));
 
     const onClick: MenuProps['onClick'] = ({ key }) => {
-        message.info(`Click on item ${key}`);
+        form.validateFields().then((values) => {
+            const metaDataArray = [];
+            // Check if meta_description exists and push it to the metaDataArray
+            if (values.meta_description) {
+                metaDataArray.push({ key: 'meta_description', value: values.meta_description });
+            }
+            // Check if meta_keywords exists and push it to the metaDataArray
+            if (values.meta_keywords) {
+                metaDataArray.push({ key: 'meta_keywords', value: values.meta_keywords });
+            }
+            // Check if meta_title exists and push it to the metaDataArray
+            if (values.meta_title) {
+                metaDataArray.push({ key: 'meta_title', value: values.meta_title });
+            }
+            // Append metaDataArray to the existing formValues
+            setFormValues({ ...formValues, metaData: [...metaDataArray] });
+        });
     };
 
     const handleNext = () => {
@@ -64,6 +86,8 @@ const AppProductsComponent = () => {
         });
     };
 
+    console.log(formValues, 'form');
+    
     return (
         <div>
             <Steps onChange={(value) => setCurrent(value)} current={current} items={itemsState} />
