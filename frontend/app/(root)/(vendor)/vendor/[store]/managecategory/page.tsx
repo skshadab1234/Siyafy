@@ -463,7 +463,6 @@ const ManageCategory = ({ params }: { params: { store: string } }) => {
                         }
                     } else if (type === 'submaincategory') {
                         const matchedSubMain = SubMainSelectedRow?.nested_subcategories?.find((item) => item.nested_subcategory_name === categoryId);
-                        console.log(matchedSubMain, 'statis');
                         if (matchedSubMain) {
                             matchedSubMain.status = checked;
                         }

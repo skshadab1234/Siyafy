@@ -24,7 +24,7 @@ const ProductSetting = ({ form }: any) => {
         <div className="mb-20">
             <h1 className="my-6 text-xl font-semibold tracking-wide text-slate-600 md:text-4xl">Product Setting</h1>
             <Form form={form} layout="vertical">
-                <Form.Item name="review_allowed" label="Review Allowed" valuePropName="checked">
+                <Form.Item name="review_allowed" label="Review Allowed">
                     <Switch className="bg-gray-500" />
                 </Form.Item>
                 <Form.Item name="average_rating" label="Average Rating">
@@ -36,41 +36,53 @@ const ProductSetting = ({ form }: any) => {
                 <Form.Item name="purchase_note" label="Purchase Note">
                     <Input.TextArea rows={4} />
                 </Form.Item>
-                <Form.Item name="meta_title" label="Meta Title">
-                    <Input />
+                <Form.Item
+                    name="meta_title"
+                    label="Meta Title"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input the meta title!', // This message is displayed if the field is left empty.
+                        },
+                    ]}
+                >
+                    <Input className="h-12" />
                 </Form.Item>
-                <Form.Item name="meta_description" label="Meta Description">
+                <Form.Item
+                    name="meta_description"
+                    label="Meta Description"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please input the meta description!', // This message is displayed if the field is left empty.
+                        },
+                    ]}
+                >
                     <Input.TextArea rows={4} />
                 </Form.Item>
-                <Form.Item name="meta_keywords" label="Meta Keywords">
-                    <Input />
+
+                <Form.Item
+                    name="meta_keywords"
+                    label="Meta Keywords"
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Please add at least one keyword',
+                            type: 'array',
+                        },
+                    ]}
+                >
+                    <Select
+                        mode="tags"
+                        style={{ width: '100%' }}
+                        placeholder="Add keywords"
+                        dropdownStyle={{ display: 'none' }} // Hide the dropdown, so it acts purely as a tag input
+                        tokenSeparators={[',']} // Allow comma to separate entries
+                    >
+                        {/* Options will be dynamically created based on input */}
+                    </Select>
                 </Form.Item>
-                <Form.List name="dimensions">
-                    {(fields, { add, remove }) => (
-                        <>
-                            {fields.map(({ key, name, fieldKey, ...restField }) => (
-                                <Form.Item {...restField} name={[name, 'value']} fieldKey={[fieldKey, 'value']} label={name === 0 ? 'Product Dimensions' : ''} key={key}>
-                                    <Input.Group compact>
-                                        <Form.Item name={[name, 'width']} noStyle rules={[{ required: true, message: 'Width is required' }]}>
-                                            <Input style={{ width: '40%' }} placeholder="Width" />
-                                        </Form.Item>
-                                        <Form.Item name={[name, 'height']} noStyle rules={[{ required: true, message: 'Height is required' }]}>
-                                            <Input style={{ width: '40%' }} placeholder="Height" />
-                                        </Form.Item>
-                                        <Form.Item name={[name, 'depth']} noStyle rules={[{ required: true, message: 'Depth is required' }]}>
-                                            <Input style={{ width: '40%' }} placeholder="Depth" />
-                                        </Form.Item>
-                                    </Input.Group>
-                                </Form.Item>
-                            ))}
-                            <Form.Item>
-                                <Button type="dashed" onClick={() => add()} block>
-                                    Add Dimension
-                                </Button>
-                            </Form.Item>
-                        </>
-                    )}
-                </Form.List>
+
                 <Form.Item name="taxable" label="Taxable" valuePropName="checked">
                     <Switch className="bg-gray-500" onChange={handleTaxableChange} />
                 </Form.Item>

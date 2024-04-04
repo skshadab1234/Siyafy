@@ -15,7 +15,7 @@ const ManageStock = ({ form }: any) => {
                         </Form.Item>
                     </Col>
                     <Col xs={24} sm={12}>
-                        <Form.Item label="Stock Status" name="stock_status">
+                        <Form.Item label="Stock Status" initialValue={'instock'} name="stock_status">
                             <Select className='h-12'>
                                 <Option value="instock">In Stock</Option>
                                 <Option value="outofstock">Out of Stock</Option>

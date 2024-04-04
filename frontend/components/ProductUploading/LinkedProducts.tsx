@@ -10,9 +10,9 @@ const LinkedProducts = ({ form, onReturn }: any) => {
 
     const [products, setProducts] = useState(null);
 
-    const [selectedRelatedProducts, setSelectedRelatedProducts] = useState([]);
-    const [selectedUpsellProducts, setSelectedUpsellProducts] = useState([]);
-    const [selectedCrossSellProducts, setSelectedCrossSellProducts] = useState([]);
+    const [selectedRelatedProducts, setSelectedRelatedProducts] = useState(form.getFieldValue('related_id') || []);
+    const [selectedUpsellProducts, setSelectedUpsellProducts] = useState(form.getFieldValue('upsell_ids') || []);
+    const [selectedCrossSellProducts, setSelectedCrossSellProducts] = useState(form.getFieldValue('cross_sell_ids') || []);
 
     useEffect(() => {
         const fetchSearchProducts = () => {

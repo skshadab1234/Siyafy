@@ -11,7 +11,6 @@ const Store = ({ params }: { params: { store: string } }) => {
     useEffect(() => {
         if (vendorData?.id && params.store) {
             checkStoreExists(vendorData.id, params.store).then((storeExists) => {
-                console.log(storeExists);
 
                 if (!storeExists?.success) {
                     router.push('/vendor');

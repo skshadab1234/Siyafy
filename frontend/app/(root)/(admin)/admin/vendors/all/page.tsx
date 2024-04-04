@@ -49,7 +49,6 @@ const AllVendors = () => {
                 body: JSON.stringify({ page, pageSize, search }), // Check if page and pageSize are included correctly
             });
 
-            console.log(response.status, 'asas');
 
             if (response.status === 401) {
                 Swal.fire({
@@ -221,7 +220,6 @@ const AllVendors = () => {
     };
 
     const editVendor = (vendor: any) => {
-        console.log(vendor);
         setModalVisible(true);
         setSelectedkey(vendor);
         form.setFieldsValue(vendor);
@@ -333,7 +331,6 @@ const AllVendors = () => {
             }
 
             const data = await res.json();
-            console.log('Success:', data);
 
             if (selectedKey) {
                 // Update the vendor in the local state to reflect the changes
@@ -390,7 +387,6 @@ const AllVendors = () => {
                         // Handle success
                         const data = await response.json();
 
-                        console.log(data);
                         setVendors((prevVendors) => prevVendors.map((vendor) => (vendor.id === selectedKey?.id ? data.data : vendor)));
                         setUploadImageButtonModal(false);
                         setFileList([]);

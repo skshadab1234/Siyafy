@@ -63,7 +63,6 @@ const ViewVendor = () => {
     }, [id]); // Dependency array, re-run useEffect when `id` or `token` changes
 
     const handleOpenModal = (store = null) => {
-        console.log(store, 'store');
         form.resetFields();
         setSelectedRow(store);
         setIsModalOpen(true);

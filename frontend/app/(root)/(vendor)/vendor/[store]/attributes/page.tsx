@@ -243,8 +243,6 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
 
         const matchingSubcategories = subcategories.filter((subcategory) => selectedAttribute.subcategory && JSON.parse(selectedAttribute.subcategory).includes(subcategory.subcategory_name));
 
-        console.log(matchingSubcategories, 'matching matchingSubcategories');
-
         // Set backendSubCategory based on matching subcategories
         setBackendSubCategory(matchingSubcategories);
     };
@@ -419,8 +417,6 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
             // Your API call to fetch categories data
             const response = await fetch(`${process.env.ADMINURL}/api/getAllProductCatgeory`);
             const data = await response.json();
-            console.log(data, 'data');
-
             const filteredData = data.filter(item => item?.store_name === params?.store);
 
             setCategories(filteredData);
@@ -462,7 +458,6 @@ const VendorAttributes = ({ params }: { params: { store: string } }) => {
 
 
     const handleSubcategoryChange = (selectedSubcategories) => {
-        console.log('Selected Subcategories:', selectedSubcategories);
         const matchedSubcategories = subcategories.filter((subcategory) => selectedSubcategories.includes(subcategory.subcategory_name));
 
         setSelectedSubcategory(selectedSubcategories);

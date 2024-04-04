@@ -1,7 +1,5 @@
 export async function checkStoreExists(vendorId, store) {
     try {
-        console.log(vendorId, store);
-        
         const res = await fetch(`${process.env.ADMINURL}/api/checkStoreExists/${vendorId}/${store}`);
         if (res.ok) {
             const data = await res.json();

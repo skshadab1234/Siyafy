@@ -27,8 +27,6 @@ const VendorSidebarDocs = () => {
     const stores = useSelector((state: IRootState) => state.vendor);
 
     const toggleMenu = (value: string) => {
-        console.log(value);
-
         setCurrentMenu((oldValue) => {
             return oldValue === value ? '' : value;
         });

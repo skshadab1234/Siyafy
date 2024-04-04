@@ -3,16 +3,23 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 import IconMenu from '@/components/icon/icon-menu';
 import IconNotesEdit from '@/components/icon/icon-notes-edit';
 import IconPlus from '@/components/icon/icon-plus';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Group, ListChecksIcon } from 'lucide-react';
-import { Drawer, Input } from 'antd';
+import { Button, Drawer, Dropdown, Form, Input, Menu } from 'antd';
 import AppProductsComponent from './AppProductsComponent';
+import { ProductCard } from '@/utils';
+import { useSelector } from 'react-redux';
+import { IRootState } from '@/store';
+import { getCookie } from './header';
 
 const AppProducts = () => {
+    const [form] = Form.useForm();
+    const [products, setProducts] = useState(null);
     const [isShowNoteMenu, setIsShowNoteMenu] = useState<any>(false);
     const [addNewMOdal, setAddNewModal] = useState<any>(false);
 
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [typeofProduct, setTypeofProduct] = useState<string>('simple');
 
     const [selectedTab, setSelectedTab] = useState<any>('all');
 
@@ -21,7 +28,7 @@ const AppProducts = () => {
         setIsShowNoteMenu(false);
     };
 
-    const handleCreate = (note: any = null) => {
+    const handleCreate = () => {
         setIsShowNoteMenu(false);
         setAddNewModal(true);
     };
@@ -46,6 +53,57 @@ const AppProducts = () => {
         setSearchTerm(value);
     };
 
+    const handleClose = () => {
+        setAddNewModal(false);
+        form.resetFields();
+    };
+
+    const handleMenuClick = (e) => {
+        console.log('Clicked on:', e.key);
+        setTypeofProduct(e.key);
+        handleCreate();
+
+        // Perform actions based on the selected option
+    };
+
+    const menu = (
+        <Menu onClick={handleMenuClick}>
+            <Menu.Item key="simple">Simple</Menu.Item>
+            <Menu.Item key="variant">Variant</Menu.Item>
+        </Menu>
+    );
+
+    const getProducts = async () => {
+        try {
+            const token = getCookie('tokenVendorsSagartech');
+            const res = await fetch(`${process.env.ADMINURL}/api/getProductsListofVendors`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to fetch products');
+            }
+
+            const data = await res.json();
+            setProducts(data?.products);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    };
+
+    useEffect(() => {
+        getProducts();
+    }, []);
+
+    const manageEdit = (product) => {
+        console.log(product, '');
+        return;
+        setIsShowNoteMenu(false);
+        setAddNewModal(true);
+        form.setFieldsValue(product);
+    };
     return (
         <div>
             <div className="relative flex h-full gap-5 sm:h-[calc(100vh_-_150px)]">
@@ -107,10 +165,12 @@ const AppProducts = () => {
                         </PerfectScrollbar>
                     </div>
                     <div className="absolute bottom-0 w-full p-4 ltr:left-0 rtl:right-0">
-                        <button className="btn btn-primary w-full" type="button" onClick={() => handleCreate()}>
-                            <IconPlus className="h-5 w-5 shrink-0 ltr:mr-2 rtl:ml-2" />
-                            Add New Product
-                        </button>
+                        <Dropdown overlay={menu}>
+                            <Button className="btn btn-primary h-10 w-full">
+                                <IconPlus className="h-5 w-5 shrink-0 ltr:mr-2 rtl:ml-2" />
+                                Add New Product
+                            </Button>
+                        </Dropdown>
                     </div>
                 </div>
                 <div className="panel h-full flex-1 overflow-auto">
@@ -126,14 +186,18 @@ const AppProducts = () => {
                                     <Input onChange={handleSearh} className="h-12 !border border-gray-500 placeholder:text-gray-800 md:w-1/2" placeholder="Search by Product Name, Sku" />
                                 </div>
                             </div>
-                            <div className="my-4 h-px w-full border-b border-white-light dark:border-[#1b2e4b]"></div>
+                            <div className="my-4 h-px w-full border-t border-white-light py-4 dark:border-[#1b2e4b]">
+                                <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8">
+                                    {products && products.map((product) => <ProductCard manageEdit={manageEdit} product={product} />)}{' '}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <Drawer title={<h1 className="text-xl font-semibold text-gray-600">Create new product</h1>} open={addNewMOdal} onClose={() => setAddNewModal(false)} width="100VW">
-                <AppProductsComponent />
+            <Drawer title={<h1 className="text-xl font-semibold text-gray-600">Create new product</h1>} open={addNewMOdal} onClose={handleClose} width="100VW">
+                <AppProductsComponent setAddNewModal={setAddNewModal} form={form} typeofProduct={typeofProduct} />
             </Drawer>
         </div>
     );

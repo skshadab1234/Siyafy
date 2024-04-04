@@ -19,7 +19,6 @@ const ApiKey = ({ params }: { params: { store: string } }) => {
     useEffect(() => {
         if (vendorData?.id && params.store) {
             checkStoreExists(vendorData.id, params.store).then((storeExists) => {
-                console.log(storeExists);
 
                 if (!storeExists?.success) {
                     router.push('/vendor');
@@ -148,8 +147,6 @@ const ApiKey = ({ params }: { params: { store: string } }) => {
     useEffect(() => {
         getApiKey();
     }, []);
-
-    console.log(loadAPis);
 
     return (
         <div>

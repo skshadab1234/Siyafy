@@ -48,7 +48,6 @@ const Managecustomer = ({ params }: { params: { store: string } }) => {
     };
 
     const handleSubmit = async (value: any) => {
-        console.log(value);
 
         setLoading(true);
         const token = getCookie('tokenVendorsSagartech');

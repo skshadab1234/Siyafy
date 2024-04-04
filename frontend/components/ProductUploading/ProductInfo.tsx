@@ -230,7 +230,31 @@ const ProductInfo = ({ form }) => {
                     </Col>
 
                     <Col xs={24} sm={24} md={8}>
-                        <Form.Item label="On Sale" name="onSale" valuePropName="checked">
+                        <Form.Item label="Product Weight" initialValue={0} name="weight" rules={[{ required: true, message: '' }]} extra="weight should in gram">
+                            <Input type="number" defaultValue={0} className="h-12"  />
+                        </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={8}>
+                        <Form.Item label="Product Width" initialValue={0} name="width" rules={[{ required: true, message: '' }]} extra="width should in cm">
+                            <Input type="number" defaultValue={0} className="h-12" />
+                        </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={8}>
+                        <Form.Item label="Product Height" initialValue={0} name="height" rules={[{ required: true, message: '' }]} extra="height should in cm">
+                            <Input type="number" defaultValue={0} className="h-12" />
+                        </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={8}>
+                        <Form.Item label="Product Length" initialValue={0} name="length" rules={[{ required: true, message: '' }]} extra="length should in cm">
+                            <Input type="number" defaultValue={0} className="h-12" />
+                        </Form.Item>
+                    </Col>
+
+                    <Col xs={24} sm={24} md={8}>
+                        <Form.Item label="On Sale" name="on_sale" valuePropName="checked">
                             <Switch className="bg-gray-500" onChange={handleSwitchChange} />
                         </Form.Item>
                     </Col>

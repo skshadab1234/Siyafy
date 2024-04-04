@@ -5,8 +5,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:where(.css-dev-only-do-not-override-djtmh8).ant-table-wrapper .ant-table{
-    background: transparent !important
+:where(.css-dev-only-do-not-override-djtmh8).ant-table-wrapper .ant-table {
+    background: transparent !important;
 }
 
 @layer components {
@@ -680,4 +680,29 @@ img.dark-img {
 }
 .dark img.dark-img {
     @apply !block;
+}
+
+.custom-title {
+    font-size: 1.125rem; /* Adjust font size as needed */
+    font-weight: 600;
+    line-height: 1.5; /* Adjust line height as needed */
+    max-height: 3rem; /* Set for 2 lines */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* Limit to 2 lines */
+}
+
+.custom-description {
+    display: block;
+    margin-top: 0.5rem; /* Adjust top margin as needed */
+    font-size: 0.875rem; /* Adjust font size as needed */
+    line-height: 1.5; /* Adjust line height as needed */
+    max-height: 6rem; /* Set for 4 lines */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4; /* Limit to 4 lines */
 }
