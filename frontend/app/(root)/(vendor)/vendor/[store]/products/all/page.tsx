@@ -7,9 +7,9 @@ export const metadata: Metadata = {
     title: 'All Products',
 };
 
-const Notes = () => {
+const Products = ({ params }: { params: { store: string } }) => {
 
-    return <AppProducts />;
+    return <AppProducts store={params.store} />;
 };
 
-export default Notes;
+export default Products;

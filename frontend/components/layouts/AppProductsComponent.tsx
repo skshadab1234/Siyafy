@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DownOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Form, MenuProps, message, Space, Steps, theme } from 'antd';
 import ProductInfo from '../ProductUploading/ProductInfo';
@@ -8,7 +8,7 @@ import ProductSetting from '../ProductUploading/ProductSetting';
 import Swal from 'sweetalert2';
 import { getCookie } from './header';
 
-const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
+const AppProductsComponent = ({ selectedProduct, products, setProducts, productUpdateKEy, form, typeofProduct, setAddNewModal, store }: any) => {
     const [formValues, setFormValues] = useState({});
     const [selectedKey, setSelectedKey] = useState(null);
     const items: MenuProps['items'] = [
@@ -22,6 +22,18 @@ const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
         },
     ];
 
+    useEffect(() => {
+        // First, reset the current value to null
+        setSelectedKey(null);
+
+        const timeoutId = setTimeout(() => {
+            setSelectedKey(productUpdateKEy);
+            setFormValues(selectedProduct);
+        }, 0);
+
+        return () => clearTimeout(timeoutId);
+    }, [productUpdateKEy]); // Dependency array to re-run this effect when `productUpdateKey` changes.
+
     const [current, setCurrent] = useState(0);
 
     const handleSetLinked = (objSelcted: any) => {
@@ -32,7 +44,7 @@ const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
     const steps = [
         {
             title: 'Product Information',
-            content: <ProductInfo form={form} />,
+            content: <ProductInfo selectedProduct={selectedProduct} form={form} />,
         },
         {
             title: 'Manage Stock',
@@ -78,7 +90,7 @@ const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
         }
 
         // Use formData directly for both Draft and non-Draft, but only validate in non-Draft cases.
-        const formData = { ...formValues, meta_data: [...metaDataArray], typeofUpload: typeofUpload?.label, typeofProduct, ...values };
+        const formData = { ...formValues, meta_data: [...metaDataArray], typeofUpload: typeofUpload?.label?.toLowerCase(), typeofProduct, ...values, store_name: store };
 
         if (typeofUpload?.label !== 'Draft') {
             // Non-Draft scenario: Validate fields and then proceed
@@ -88,12 +100,22 @@ const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
                 if (selectedKey) {
                     // UPdate
                     console.log('UPdate');
-                    await updateProduct(selectedKey, formData);
+                    const updatedData = await updateProduct(selectedKey, formData);
+                    console.log(updatedData, 'updated row sas');
+
+                    form.resetFields();
+                    setCurrent(0);
+                    setAddNewModal(false);
+                    setFormValues(formData); // Update form values state
                 } else {
                     const backendResponse = await processBackendLogic(formData);
                     if (backendResponse?.status) {
                         setSelectedKey(backendResponse?.data);
                     }
+                    form.resetFields();
+                    setCurrent(0);
+                    setAddNewModal(false);
+                    setFormValues(formData); // Update form values state
                 }
             } catch (error) {
                 // Handle validation errors
@@ -105,18 +127,21 @@ const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
                 // UPdate
                 console.log('UPdate');
                 await updateProduct(selectedKey, formData);
+                form.resetFields();
+                setCurrent(0);
+                setAddNewModal(false);
+                setFormValues(formData); // Update form values state
             } else {
                 const backendResponse = await processBackendLogic(formData);
                 if (backendResponse?.status) {
                     setSelectedKey(backendResponse?.data);
                 }
+                form.resetFields();
+                setCurrent(0);
+                setAddNewModal(false);
+                setFormValues(formData); // Update form values state
             }
         }
-
-        form.resetFields();
-        setCurrent(0);
-        setAddNewModal(false);
-        setFormValues(formData); // Update form values state
     };
 
     const processBackendLogic = async (formData: any) => {
@@ -246,6 +271,8 @@ const AppProductsComponent = ({ form, typeofProduct, setAddNewModal }: any) => {
             // next() // If you want to call next function after updating formValues
         });
     };
+
+    console.log(formValues, 'FormValues');
 
     return (
         <div>

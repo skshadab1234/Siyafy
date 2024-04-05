@@ -66,4 +66,74 @@ async function updateStoreName(
   }
 }
 
-module.exports = { updateStoreName };
+async function fetchProductById(productId) {
+  const query = "SELECT * FROM products WHERE id = $1";
+  const { rows } = await pool.query(query, [productId]);
+  return rows[0]; // Assuming id is unique and only one product is returned
+}
+
+async function fetchAndStructureProductDetails(product) {
+  // Fetch related products
+  const relatedProducts = await Promise.all(
+    (product.related_ids || []).map(fetchProductById)
+  );
+
+  // Fetch upsell products
+  const upsellProducts = await Promise.all(
+    (product.upsell_ids || []).map(fetchProductById)
+  );
+
+  // Fetch cross-sell products
+  const crossSellProducts = await Promise.all(
+    (product.cross_sell_ids || []).map(fetchProductById)
+  );
+
+  // Extract and restructure meta_data
+  const meta = {};
+  if (product.meta_data && Array.isArray(product.meta_data)) {
+    product.meta_data.forEach((item) => {
+      meta[item.key] = item.value;
+    });
+  }
+
+  // Extract and restructure dimensions
+  const dimensions = {
+    width: product.dimensions.width,
+    height: product.dimensions.height,
+    length: product.dimensions.length,
+    weight: product.dimensions.weight,
+  };
+
+  // Prepare the modified product object
+  const modifiedProduct = {
+    ...product,
+    meta_title: meta.meta_title || null,
+    meta_description: meta.meta_description || null,
+    meta_keywords: meta.meta_keywords || null,
+    ...dimensions,
+    related_ids: relatedProducts,
+    upsell_ids: upsellProducts,
+    cross_sell_ids: crossSellProducts,
+    typeofProduct: product.type,
+    typeofUpload: product.status,
+    back_images: product.images,
+  };
+
+  // Clean up the modified product object
+  delete modifiedProduct.dimensions;
+  delete modifiedProduct.meta_data;
+  delete modifiedProduct.related_ids;
+  delete modifiedProduct.upsell_ids;
+  delete modifiedProduct.cross_sell_ids;
+  delete modifiedProduct.images;
+  delete modifiedProduct.type;
+  delete modifiedProduct.status;
+
+  return modifiedProduct;
+}
+
+module.exports = {
+  updateStoreName,
+  fetchAndStructureProductDetails,
+  fetchProductById,
+};

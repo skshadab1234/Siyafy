@@ -8,19 +8,19 @@ import { Group, ListChecksIcon } from 'lucide-react';
 import { Button, Drawer, Dropdown, Form, Input, Menu } from 'antd';
 import AppProductsComponent from './AppProductsComponent';
 import { ProductCard } from '@/utils';
-import { useSelector } from 'react-redux';
-import { IRootState } from '@/store';
 import { getCookie } from './header';
 
-const AppProducts = () => {
+const AppProducts = ({ store }: any) => {
     const [form] = Form.useForm();
     const [products, setProducts] = useState(null);
     const [isShowNoteMenu, setIsShowNoteMenu] = useState<any>(false);
     const [addNewMOdal, setAddNewModal] = useState<any>(false);
 
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [selectedKEy, setSelectedKey] = useState(null);
     const [typeofProduct, setTypeofProduct] = useState<string>('simple');
 
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedTab, setSelectedTab] = useState<any>('all');
 
     const tabChanged = (type: string) => {
@@ -98,8 +98,9 @@ const AppProducts = () => {
     }, []);
 
     const manageEdit = (product) => {
-        console.log(product, '');
-        return;
+        console.log(product);
+        setSelectedKey(product?.id);
+        setSelectedProduct(product);
         setIsShowNoteMenu(false);
         setAddNewModal(true);
         form.setFieldsValue(product);
@@ -197,7 +198,16 @@ const AppProducts = () => {
             </div>
 
             <Drawer title={<h1 className="text-xl font-semibold text-gray-600">Create new product</h1>} open={addNewMOdal} onClose={handleClose} width="100VW">
-                <AppProductsComponent setAddNewModal={setAddNewModal} form={form} typeofProduct={typeofProduct} />
+                <AppProductsComponent
+                    setProducts={setProducts}
+                    products={products}
+                    productUpdateKEy={selectedKEy}
+                    store={store}
+                    setAddNewModal={setAddNewModal}
+                    form={form}
+                    typeofProduct={typeofProduct}
+                    selectedProduct={selectedProduct}
+                />
             </Drawer>
         </div>
     );

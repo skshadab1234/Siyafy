@@ -26,10 +26,15 @@ export const getUndefinedFields = (obj: any, fieldsToExclude: string[] = []): st
 };
 
 export const ProductCard = ({ product, manageEdit }: any) => {
-    const { name, images, price, id } = product;
+    const { name, back_images, price, id } = product;
+
+    console.log(back_images, 'image');
 
     // Check if images array is not empty
-    const imageUrl = images.length > 0 ? images[0] : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMZvHd_KZlVgD1FtA0d4YQOqfohOJbeLv3R3ZlTsPW8w&s'; // Replace 'placeholder.jpg' with your default image path
+    const imageUrl =
+        back_images?.length > 0
+            ? `${process.env.ADMINURL}/upload/vendorProducts/${back_images[0]}`
+            : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMZvHd_KZlVgD1FtA0d4YQOqfohOJbeLv3R3ZlTsPW8w&s'; // Replace 'placeholder.jpg' with your default image path
 
     return (
         <div className="group cursor-pointer">

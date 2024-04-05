@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Row, Col, Upload, Button, List, Modal, Image, Input, Switch, DatePicker, Divider } from 'antd';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 import { slugify } from '@/utils';
+import { Trash2Icon } from 'lucide-react';
 
-const ProductInfo = ({ form }) => {
+const ProductInfo = ({ form, selectedProduct }) => {
     const [fileList, setFileList] = useState([]);
     const [previewVisible, setPreviewVisible] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
@@ -13,6 +14,11 @@ const ProductInfo = ({ form }) => {
     const [value, setValue] = useState('');
     const [regularPrice, setRegularPrice] = useState(0);
     const [isOnSale, setIsOnSale] = useState(false);
+
+    const [updatedImages, setUpdatedImages] = useState(selectedProduct?.back_images);
+    useEffect(() => {
+        setUpdatedImages(updatedImages);
+    }, []);
 
     const handleUploadChange = ({ fileList: newFileList }) => {
         // Automatically generate preview URLs for image files
@@ -96,7 +102,6 @@ const ProductInfo = ({ form }) => {
     const calculateDiscount = (price, regularPrice) => {
         const discount = regularPrice - price;
         const percentage = ((discount / regularPrice) * 100).toFixed(2);
-
         const discountString = `(${percentage}%)`;
         form.setFieldsValue({ discount: discountString });
     };
@@ -113,8 +118,40 @@ const ProductInfo = ({ form }) => {
         }
     };
 
+    const handleDelete = (image: string) => {
+        if (selectedProduct) {
+            const index = selectedProduct.back_images.indexOf(image);
+            console.log(index, 'index to update');
+
+            if (index !== -1) {
+                const updatedBackImages = [...selectedProduct.back_images];
+                updatedBackImages.splice(index, 1);
+
+                console.log(updatedBackImages);
+
+                // Update the selectedProduct state with the new array
+                setUpdatedImages(updatedBackImages);
+            }
+        }
+    };
+
     return (
         <div className="mb-10">
+            <h1>Uploaded Medias</h1>
+            <div className="flex flex-wrap gap-4">
+                {updatedImages.map((item, index) => (
+                    <div key={index} className="relative">
+                        <Image className="aspect-3/2 h-12 object-cover shadow-lg" width={100} src={`${process.env.ADMINURL}/upload/vendorProducts/${item}`} alt={item.alt} style={{ width: '100%' }} />
+                        <button
+                            className="absolute right-2 top-2 rounded bg-red-500 p-2 text-white"
+                            onClick={() => handleDelete(item)} // Assuming handleDeleteImage is your delete image function
+                        >
+                            <Trash2Icon className="h-4 w-4" />
+                        </button>
+                    </div>
+                ))}
+            </div>
+
             <Form form={form} layout="vertical">
                 <Row gutter={24}>
                     <Col span={24}>
@@ -231,7 +268,7 @@ const ProductInfo = ({ form }) => {
 
                     <Col xs={24} sm={24} md={8}>
                         <Form.Item label="Product Weight" initialValue={0} name="weight" rules={[{ required: true, message: '' }]} extra="weight should in gram">
-                            <Input type="number" defaultValue={0} className="h-12"  />
+                            <Input type="number" defaultValue={0} className="h-12" />
                         </Form.Item>
                     </Col>
 

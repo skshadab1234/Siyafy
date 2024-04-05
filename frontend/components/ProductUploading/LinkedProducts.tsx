@@ -10,7 +10,7 @@ const LinkedProducts = ({ form, onReturn }: any) => {
 
     const [products, setProducts] = useState(null);
 
-    const [selectedRelatedProducts, setSelectedRelatedProducts] = useState(form.getFieldValue('related_id') || []);
+    const [selectedRelatedProducts, setSelectedRelatedProducts] = useState(form.getFieldValue('related_ids') || []);
     const [selectedUpsellProducts, setSelectedUpsellProducts] = useState(form.getFieldValue('upsell_ids') || []);
     const [selectedCrossSellProducts, setSelectedCrossSellProducts] = useState(form.getFieldValue('cross_sell_ids') || []);
 
@@ -109,7 +109,7 @@ const LinkedProducts = ({ form, onReturn }: any) => {
     };
 
     useEffect(() => {
-        onReturn({ related_id: selectedRelatedProducts, upsell_ids: selectedUpsellProducts, cross_sell_ids: selectedCrossSellProducts });
+        onReturn({ related_ids: selectedRelatedProducts, upsell_ids: selectedUpsellProducts, cross_sell_ids: selectedCrossSellProducts });
     }, [selectedUpsellProducts, selectedCrossSellProducts, selectedRelatedProducts]);
 
     // ProductCard component

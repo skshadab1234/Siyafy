@@ -510,6 +510,13 @@ app.post("/vendors/store/add", uploadStore.array("file"), async (req, res) => {
         parseInt(vendor_id)
       );
 
+      await updateStoreName(
+        "products",
+        parsedSelectedRow?.store_slug,
+        slugify(store_name),
+        parseInt(vendor_id)
+      );
+
       return res
         .status(200)
         .json({ message: "Store updated successfully", data: rows[0] });
