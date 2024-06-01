@@ -6,13 +6,8 @@ const path = require("path");
 
 // Routes
 const admin = require("./routes/admin");
-const vendors = require("./routes/vendors");
-const vendorStore = require("./routes/vendor-store");
-const customer = require("./routes/customer");
-const category = require("./routes/category");
-const attributes = require("./routes/attributes");
-const subcategory = require("./routes/subcategory");
-const products = require("./routes/products");
+const consult = require("./routes/consult");
+
 
 app.use(express.json()); // Middleware para parsear el body
 app.use(cors());
@@ -22,13 +17,8 @@ require("dotenv").config();
 
 //ALl Routes
 app.use("/api", admin);
-app.use("/api", vendors);
-app.use("/api", vendorStore);
-app.use("/api", customer);
-app.use("/api", category);
-app.use("/api", attributes);
-app.use("/api", subcategory);
-app.use("/api", products);
+app.use("/api", consult);
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

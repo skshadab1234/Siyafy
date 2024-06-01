@@ -97,8 +97,8 @@ const Sidebar = () => {
                 <div className="h-full bg-white dark:bg-black">
                     <div className="flex items-center justify-between px-4 py-3">
                         <Link href="/" className="main-logo flex shrink-0 items-center">
-                            {/* <img className="ml-[5px] w-8 flex-none" src="/assets/images/logo.svg" alt="logo" /> */}
-                            <span className="align-middle text-2xl font-semibold ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light lg:inline">{process.env.WEBSITE_NAME}</span>
+                            <img className="ml-[5px] w-40 flex-none" src="/logo.jpeg" alt="logo" />
+                            {/* <span className="align-middle text-2xl font-semibold ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light lg:inline">{process.env.WEBSITE_NAME}</span> */}
                         </Link>
 
                         <button
@@ -188,23 +188,23 @@ const Sidebar = () => {
                             </h2>
 
                             <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === '/admin/vendors/all' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('/admin/vendors/all')}>
+                                <button type="button" className={`${currentMenu === '/admin/consultation/all' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('/admin/consultation/all')}>
                                     <div className="flex items-center">
                                         <IconUserPlus className="shrink-0 group-hover:!text-primary" />
                                         <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">
-                                            {t('Vendors')} 
+                                            {t('Consultaion')} 
                                         </span>
                                     </div>
 
-                                    <div className={currentMenu !== '/admin/vendors/all' ? '-rotate-90 rtl:rotate-90' : ''}>
+                                    <div className={currentMenu !== '/admin/consultation/all' ? '-rotate-90 rtl:rotate-90' : ''}>
                                         <IconCaretDown />
                                     </div>
                                 </button>
 
-                                <AnimateHeight duration={300} height={currentMenu === '/admin/vendors/all' ? 'auto' : 0}>
+                                <AnimateHeight duration={300} height={currentMenu === '/admin/consultation/all' ? 'auto' : 0}>
                                     <ul className="sub-menu text-gray-500">
                                         <li>
-                                            <Link href="/admin/vendors/all">{t('All Vendors')}</Link>
+                                            <Link href="/admin/consultation/all">{t('All Consultation')}</Link>
                                         </li>
                                     </ul>
                                 </AnimateHeight>

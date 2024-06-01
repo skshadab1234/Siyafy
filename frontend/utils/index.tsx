@@ -47,3 +47,39 @@ export const ProductCard = ({ product, manageEdit }: any) => {
         </div>
     );
 };
+
+export const formatDateTime = (startDate: string, startTime: string, endDate: string, endTime: string): { start: string; end: string } => {
+    const startDateTime = new Date(startDate);
+    const startTimeParts = startTime.split(':');
+    startDateTime.setHours(parseInt(startTimeParts[0], 10), parseInt(startTimeParts[1], 10));
+
+    const endDateTime = new Date(endDate);
+    const endTimeParts = endTime.split(':');
+    endDateTime.setHours(parseInt(endTimeParts[0], 10), parseInt(endTimeParts[1], 10));
+
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const options: Intl.DateTimeFormatOptions = {
+        hour12: true,
+        hour: 'numeric',
+        minute: 'numeric',
+    };
+
+    let start = '';
+    let end = '';
+
+    if (startDateTime.toDateString() === today.toDateString()) {
+        start = `Today ${startDateTime.toLocaleTimeString('en-US', options)}`;
+        end = `${endDateTime.toLocaleTimeString('en-US', options)}`;
+    } else if (startDateTime.toDateString() === yesterday.toDateString()) {
+        start = `Yesterday ${startDateTime.toLocaleTimeString('en-US', options)}`;
+        end = `${endDateTime.toLocaleTimeString('en-US', options)}`;
+    } else {
+        start = `${startDateTime.toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', ...options })}`;
+        end = `${endDateTime.toLocaleTimeString('en-US', options)}`;
+    }
+
+    return { start, end };
+};
